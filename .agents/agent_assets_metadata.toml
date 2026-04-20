@@ -1,0 +1,55 @@
+uploads = []
+
+[[generated]]
+id = "WyW-JsnOgiZ3V_dPaxh8b"
+uri = "file://artifacts/shoes-store/public/images/shoe-1.png"
+type = "image"
+title = "Nike Air Jordan 1 High"
+
+[[generated]]
+id = "cKIzYWnjjiFCVEDIhwoAf"
+uri = "file://artifacts/shoes-store/public/images/shoe-3.png"
+type = "image"
+title = "Adidas Yeezy Boost"
+
+[[generated]]
+id = "_F0PfzV1GeiZPQfT9STtB"
+uri = "file://artifacts/shoes-store/public/images/shoe-4.png"
+type = "image"
+title = "Nike Dunk Low Panda"
+
+[[generated]]
+id = "kMP9Y2AOTPBPBYRUlOJml"
+uri = "file://artifacts/shoes-store/public/images/shoe-5.png"
+type = "image"
+title = "Puma Suede Classic"
+
+[[generated]]
+id = "4F7p9J5AnA6ck_PNl18TG"
+uri = "file://artifacts/shoes-store/public/images/shoe-6.png"
+type = "image"
+title = "New Balance 550"
+
+[[generated]]
+id = "ocdD-ry8WA0u4ePpJtTNU"
+uri = "file://artifacts/shoes-store/public/images/shoe-7.png"
+type = "image"
+title = "Adidas Samba White"
+
+[[generated]]
+id = "mY2RG_U3JpbqC4poC40JG"
+uri = "file://artifacts/shoes-store/public/images/shoe-8.png"
+type = "image"
+title = "Nike Air Max 95"
+
+[[generated]]
+id = "4fCna_mWVge1Ie_pLpqsy"
+uri = "file://artifacts/shoes-store/public/images/shoe-2.png"
+type = "image"
+title = "Nike Air Force 1 Low"
+
+[[outputs]]
+id = "m7kBs1XdE0lbq4M2xxKXd"
+uri = "file://attached_assets/stock_images/stock_image.jpg"
+type = "image"
+title = "nike basketball shoes product photo"
