@@ -35,7 +35,7 @@ export default function Home() {
             className="relative w-full rounded-3xl overflow-hidden bg-linear-to-br from-red-600 to-gray-800 shadow-xl"
           >
             <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35),transparent_38%),radial-gradient(circle_at_85%_0%,rgba(255,255,255,0.22),transparent_34%)]"></div>
-            <div className="relative z-10 px-6 py-12 md:px-12 md:py-20 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="relative z-10 px-6 py-12 md:px-12 md:py-20 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
               <div className="flex-1 text-center md:text-left">
                 <span className="inline-block py-1 px-3 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-md">
                   Collection jdida 2025

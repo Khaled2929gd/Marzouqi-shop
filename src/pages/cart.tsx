@@ -50,7 +50,7 @@ export default function Cart() {
                   exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                   className="flex gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
                 >
-                  <Link href={`/products/${item.productId}`} className="shrink-0 w-24 h-24 md:w-32 md:h-32 bg-gray-50 rounded-2xl p-2 flex items-center justify-center">
+                  <Link href={`/products/${item.productId}`} className="shrink-0 w-20 h-20 sm:w-28 sm:h-28 bg-gray-50 rounded-2xl p-2 flex items-center justify-center">
                     <img src={item.productImage} alt={item.productName} loading="lazy" decoding="async" width={320} height={320} className="w-full h-full object-contain drop-shadow-md" />
                   </Link>
                   

@@ -216,7 +216,7 @@ export default function ProductDetail() {
               <h3 className="font-semibold text-gray-900">Khtar pointure</h3>
               <button className="text-sm text-gray-500 underline underline-offset-4 hover:text-gray-900">Guide des tailles</button>
             </div>
-            <div className="grid grid-cols-4 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
               {product.sizes.map((size) => (
                 <button
                   key={size}
