@@ -27,44 +27,147 @@ export default function Home() {
     <Layout>
       <div className="flex-1 w-full pb-10">
         {/* Hero Section */}
-        <section className="px-4 py-6 md:px-8 md:py-12">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="relative w-full rounded-3xl overflow-hidden bg-linear-to-br from-red-600 to-gray-800 shadow-xl"
-          >
-            <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35),transparent_38%),radial-gradient(circle_at_85%_0%,rgba(255,255,255,0.22),transparent_34%)]"></div>
-            <div className="relative z-10 px-6 py-12 md:px-12 md:py-20 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
-              <div className="flex-1 text-center md:text-left">
-                <span className="inline-block py-1 px-3 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-md">
-                  Collection jdida 2025
-                </span>
-                <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight tracking-tight">
-                  Dkhol b style <br className="hidden md:block"/> li kayban.
-                </h2>
-                <p className="text-red-100 text-sm md:text-base max-w-md mx-auto md:mx-0 mb-8">
-                  Khtrna lik sneakers top, asliyin w b design li kayjib l3in.
-                </p>
-                <Link href="/products" className="inline-flex items-center justify-center bg-white text-red-900 font-bold px-8 py-3.5 rounded-full hover:bg-gray-50 active:scale-95 transition-all shadow-[0_4px_14px_rgba(0,0,0,0.2)]">
-                  Chof lproduits
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Link>
+        <section className="px-4 py-6 md:px-8 md:py-8">
+          <div className="relative w-full rounded-3xl overflow-hidden bg-[#0c0c0e] min-h-[500px] md:min-h-[560px] shadow-2xl">
+
+            {/* Background: blurred color orbs */}
+            <div className="absolute -top-20 -left-20 w-96 h-96 bg-red-700/25 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-80 h-80 bg-red-950/40 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-red-600/5 rounded-full blur-2xl pointer-events-none" />
+            {/* Subtle dot grid */}
+            <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:28px_28px] pointer-events-none" />
+
+            {/* Content */}
+            <div className="relative z-10 flex flex-col md:flex-row items-center min-h-[500px] md:min-h-[560px]">
+
+              {/* Left: text */}
+              <div className="flex-1 px-7 pt-12 pb-6 md:px-14 md:py-16 flex flex-col items-center md:items-start text-center md:text-left">
+
+                {/* Badge */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="inline-flex items-center gap-2 bg-red-600/15 border border-red-600/30 text-red-400 text-[11px] font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-7"
+                >
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                  New Drop · Collection 2025
+                </motion.div>
+
+                {/* Heading */}
+                <motion.h2
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  className="text-[2.6rem] md:text-5xl lg:text-6xl font-black text-white leading-[1.05] tracking-tight mb-5"
+                >
+                  Sneakers
+                  <br />
+                  <span className="text-red-500">Premium.</span>
+                  <br />
+                  <span className="text-gray-500 font-light text-3xl md:text-4xl">Livrés chez toi.</span>
+                </motion.h2>
+
+                {/* Subtitle */}
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.32 }}
+                  className="text-gray-500 text-sm md:text-base max-w-xs md:max-w-sm mb-8 leading-relaxed"
+                >
+                  Les meilleures sneakers authentiques, sélectionnées pour toi. Style, confort et qualité garantis.
+                </motion.p>
+
+                {/* Stats */}
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.42 }}
+                  className="flex items-center gap-5 mb-8"
+                >
+                  <div>
+                    <div className="text-xl font-black text-white">2 500+</div>
+                    <div className="text-[11px] text-gray-600 mt-0.5">Clients</div>
+                  </div>
+                  <div className="w-px h-8 bg-gray-800" />
+                  <div>
+                    <div className="text-xl font-black text-white">4.9 <span className="text-red-500 text-base">★</span></div>
+                    <div className="text-[11px] text-gray-600 mt-0.5">Note moy.</div>
+                  </div>
+                  <div className="w-px h-8 bg-gray-800" />
+                  <div>
+                    <div className="text-xl font-black text-white">100%</div>
+                    <div className="text-[11px] text-gray-600 mt-0.5">Authentique</div>
+                  </div>
+                </motion.div>
+
+                {/* CTAs */}
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.52 }}
+                  className="flex items-center gap-3"
+                >
+                  <Link
+                    href="/products"
+                    className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold px-7 py-3.5 rounded-full transition-all shadow-[0_0_24px_rgba(220,38,38,0.45)]"
+                  >
+                    Découvrir
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    href="/products"
+                    className="inline-flex items-center gap-2 text-gray-400 hover:text-white font-semibold px-5 py-3.5 rounded-full border border-gray-700 hover:border-gray-500 transition-all"
+                  >
+                    Voir tout
+                  </Link>
+                </motion.div>
               </div>
-              <div className="flex-1 w-full flex justify-center md:justify-end">
-                <img 
-                  src="/images/shoe-1.png" 
-                  alt="Featured Sneaker" 
+
+              {/* Right: shoe */}
+              <div className="flex-1 relative flex items-end md:items-center justify-center w-full pb-10 md:pb-0 md:pr-10 md:py-12 min-h-[280px] md:min-h-auto">
+
+                {/* Red glow puddle under shoe */}
+                <div className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 w-56 h-10 bg-red-600/40 blur-2xl rounded-full pointer-events-none" />
+
+                {/* Floating shoe */}
+                <motion.img
+                  src="/images/shoe-1.png"
+                  alt="Sneaker vedette"
                   width={900}
                   height={700}
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
-                  className="w-full max-w-[320px] md:max-w-112.5 drop-shadow-[0_20px_30px_rgba(0,0,0,0.4)] -rotate-12 hover:rotate-0 transition-transform duration-700 hover:scale-105"
+                  animate={{ y: [0, -16, 0] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                  className="relative z-10 w-full max-w-[280px] md:max-w-[420px] drop-shadow-[0_40px_60px_rgba(0,0,0,0.8)] -rotate-6"
                 />
+
+                {/* Floating chip: Tendance */}
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.7 }}
+                  className="absolute top-8 right-6 md:right-4 bg-white/8 backdrop-blur-md border border-white/10 text-white text-xs font-bold px-3.5 py-2 rounded-2xl flex items-center gap-1.5"
+                >
+                  🔥 <span>Tendance</span>
+                </motion.div>
+
+                {/* Floating chip: Starting price */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.85 }}
+                  className="absolute bottom-16 md:bottom-20 left-4 md:left-2 bg-white/8 backdrop-blur-md border border-white/10 rounded-2xl px-3.5 py-2.5"
+                >
+                  <div className="text-[10px] text-gray-500 mb-0.5">À partir de</div>
+                  <div className="text-white font-black text-lg leading-none">89<span className="text-red-400 text-sm">$</span></div>
+                </motion.div>
+
               </div>
             </div>
-          </motion.div>
+          </div>
         </section>
 
         {/* Brands/Categories */}
