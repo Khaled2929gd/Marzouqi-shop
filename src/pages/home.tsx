@@ -2,7 +2,7 @@ import { useGetFeaturedProducts, useListCategories } from "@workspace/api-client
 import { Layout } from "../components/layout";
 import { ProductCard } from "../components/product-card";
 import { Link } from "wouter";
-import { ArrowLeft, Zap, TrendingUp, ShieldCheck, Star } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Truck, RotateCcw } from "lucide-react";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -24,210 +24,127 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="flex-1 w-full pb-10">
+      <div className="flex-1 w-full">
 
-        {/* Hero Section */}
-        <section className="px-4 py-6 md:px-8 md:py-8">
-          <div className="relative w-full rounded-3xl overflow-hidden bg-[#0c0c0e] min-h-[500px] md:min-h-[560px] shadow-2xl">
+        {/* Hero — editorial split */}
+        <section className="flex flex-col md:flex-row min-h-[480px] md:min-h-[560px] border-b border-gray-100">
 
-            {/* Background orbs */}
-            <div className="absolute -top-20 -right-20 w-96 h-96 bg-red-700/25 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-red-950/40 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3 pointer-events-none" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-red-600/5 rounded-full blur-2xl pointer-events-none" />
-            {/* Dot grid */}
-            <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:28px_28px] pointer-events-none" />
+          {/* Text side (start = right in RTL) */}
+          <div className="flex-1 flex flex-col justify-center px-6 md:px-14 py-12 md:py-20 order-2 md:order-1">
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="text-[11px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-5"
+            >
+              كوليكشن 2025
+            </motion.p>
 
-            {/* Content */}
-            <div className="relative z-10 flex flex-col md:flex-row items-center min-h-[500px] md:min-h-[560px]">
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.08 }}
+              className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 leading-[1.05] tracking-tight mb-5"
+            >
+              سنيكرز<br />
+              بريميوم.
+            </motion.h1>
 
-              {/* Text — start side (right in RTL) */}
-              <div className="flex-1 px-7 pt-12 pb-6 md:px-14 md:py-16 flex flex-col items-center md:items-start text-center md:text-start">
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.16 }}
+              className="text-gray-500 text-base max-w-xs mb-8 leading-relaxed"
+            >
+              أحذية أصلية مختارة، تصلك لباب الدار.
+            </motion.p>
 
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="inline-flex items-center gap-2 bg-red-600/15 border border-red-600/30 text-red-400 text-[11px] font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-7"
-                >
-                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                  كوليكشن جديد · 2025
-                </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.24 }}
+              className="flex items-center gap-3"
+            >
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-2 bg-gray-900 hover:bg-black active:scale-95 text-white font-semibold px-7 py-3 rounded-full transition-all text-sm"
+              >
+                اكتشف المتجر
+                <ArrowLeft className="w-4 h-4 rtl-flip" />
+              </Link>
+            </motion.div>
+          </div>
 
-                <motion.h2
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.5 }}
-                  className="text-[2.6rem] md:text-5xl lg:text-6xl font-black text-white leading-[1.15] tracking-tight mb-5"
-                >
-                  سنيكرز
-                  <br />
-                  <span className="text-red-500">بريميوم.</span>
-                  <br />
-                  <span className="text-gray-500 font-light text-3xl md:text-4xl">نوصلها لباب الدار.</span>
-                </motion.h2>
-
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.32 }}
-                  className="text-gray-500 text-sm md:text-base max-w-xs md:max-w-sm mb-8 leading-relaxed"
-                >
-                  أفضل الأحذية الرياضية الأصلية، مختارة بعناية. ستايل، راحة وجودة مضمونة.
-                </motion.p>
-
-                {/* Stats */}
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.42 }}
-                  className="flex items-center gap-5 mb-8"
-                >
-                  <div>
-                    <div className="text-xl font-black text-white" dir="ltr">2,500+</div>
-                    <div className="text-[11px] text-gray-600 mt-0.5">عميل</div>
-                  </div>
-                  <div className="w-px h-8 bg-gray-800" />
-                  <div>
-                    <div className="text-xl font-black text-white" dir="ltr">4.9 <span className="text-red-500 text-base">★</span></div>
-                    <div className="text-[11px] text-gray-600 mt-0.5">متوسط التقييم</div>
-                  </div>
-                  <div className="w-px h-8 bg-gray-800" />
-                  <div>
-                    <div className="text-xl font-black text-white">%100</div>
-                    <div className="text-[11px] text-gray-600 mt-0.5">أصلي</div>
-                  </div>
-                </motion.div>
-
-                {/* CTAs */}
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.52 }}
-                  className="flex items-center gap-3"
-                >
-                  <Link
-                    href="/products"
-                    className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold px-7 py-3.5 rounded-full transition-all shadow-[0_0_24px_rgba(220,38,38,0.45)]"
-                  >
-                    اكتشف
-                    <ArrowLeft className="w-4 h-4" />
-                  </Link>
-                  <Link
-                    href="/products"
-                    className="inline-flex items-center text-gray-400 hover:text-white font-semibold px-5 py-3.5 rounded-full border border-gray-700 hover:border-gray-500 transition-all"
-                  >
-                    شوف الكل
-                  </Link>
-                </motion.div>
-              </div>
-
-              {/* Shoe — end side (left in RTL) */}
-              <div className="flex-1 relative flex items-end md:items-center justify-center w-full pb-10 md:pb-0 md:ps-10 md:py-12 min-h-[280px]">
-
-                {/* Glow puddle */}
-                <div className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 w-56 h-10 bg-red-600/40 blur-2xl rounded-full pointer-events-none" />
-
-                <motion.img
-                  src="/images/shoe-1.png"
-                  alt="سنيكر مميز"
-                  width={900}
-                  height={700}
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  animate={{ y: [0, -16, 0] }}
-                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                  className="relative z-10 w-full max-w-[280px] md:max-w-[420px] drop-shadow-[0_40px_60px_rgba(0,0,0,0.8)] rotate-6"
-                />
-
-                {/* Floating chip: trending */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.7 }}
-                  className="absolute top-8 left-6 md:left-4 bg-white/8 backdrop-blur-md border border-white/10 text-white text-xs font-bold px-3.5 py-2 rounded-2xl flex items-center gap-1.5"
-                >
-                  🔥 <span>الأكثر طلبًا</span>
-                </motion.div>
-
-                {/* Floating chip: price */}
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.85 }}
-                  className="absolute bottom-16 md:bottom-20 right-4 md:right-2 bg-white/8 backdrop-blur-md border border-white/10 rounded-2xl px-3.5 py-2.5"
-                >
-                  <div className="text-[10px] text-gray-500 mb-0.5">ابتداءً من</div>
-                  <div className="text-white font-black text-lg leading-none" dir="ltr">89<span className="text-red-400 text-sm">$</span></div>
-                </motion.div>
-              </div>
+          {/* Image side (end = left in RTL) */}
+          <div className="relative flex-1 bg-[#f5f5f5] flex items-center justify-center p-8 md:p-12 min-h-[300px] order-1 md:order-2">
+            <motion.img
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              src="/images/shoe-1.png"
+              alt="سنيكر مميز"
+              width={900}
+              height={700}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              className="relative z-10 w-full max-w-[260px] md:max-w-[400px] drop-shadow-xl rotate-6"
+            />
+            <div className="absolute bottom-6 end-6 bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm">
+              <p className="text-[10px] text-gray-400 mb-0.5">ابتداءً من</p>
+              <p className="font-black text-gray-900 text-lg leading-none" dir="ltr">89<span className="text-gray-400 text-sm font-medium">$</span></p>
             </div>
           </div>
         </section>
 
         {/* Categories */}
-        <section className="px-4 md:px-8 py-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900">أبرز الأقسام</h3>
-          </div>
-          <div className="flex overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 gap-3 snap-x scrollbar-hide">
+        <section className="px-4 md:px-8 py-8 border-b border-gray-100">
+          <div className="flex overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 gap-2 snap-x scrollbar-hide">
             {isLoadingCategories ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-28 rounded-full shrink-0" />
+                <Skeleton key={i} className="h-10 w-24 rounded-full shrink-0" />
               ))
             ) : (
-              <Link href="/products" className="shrink-0 snap-start bg-gray-900 text-white px-6 py-3 rounded-full font-semibold text-sm shadow-md hover:bg-gray-800 transition-colors">
-                الكل
-              </Link>
-            )}
-
-            {categories?.map((category, i) => (
-              <motion.div
-                key={category.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="shrink-0 snap-start"
-              >
-                <Link
-                  href={`/products?category=${category.slug}`}
-                  className="block bg-white border border-gray-100 text-gray-800 px-6 py-3 rounded-full font-semibold text-sm shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-700 transition-colors"
-                >
-                  {getCategoryLabel(category.name)}
+              <>
+                <Link href="/products" className="shrink-0 snap-start bg-gray-900 text-white px-5 py-2 rounded-full font-medium text-sm transition-colors">
+                  الكل
                 </Link>
-              </motion.div>
-            ))}
+                {categories?.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/products?category=${category.slug}`}
+                    className="shrink-0 snap-start bg-white border border-gray-200 text-gray-700 px-5 py-2 rounded-full font-medium text-sm hover:border-gray-900 hover:text-gray-900 transition-colors"
+                  >
+                    {getCategoryLabel(category.name)}
+                  </Link>
+                ))}
+              </>
+            )}
           </div>
         </section>
 
         {/* Featured Products */}
-        <section className="px-4 md:px-8 py-8">
-          <div className="flex items-end justify-between mb-6">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-red-600" />
-                الأكثر مبيعًا
-              </h3>
-              <p className="text-sm text-gray-500 mt-1">أكثر الأحذية طلبًا هذا الأسبوع</p>
-            </div>
-            <Link href="/products" className="text-sm font-semibold text-red-600 hover:text-red-700 hidden sm:block">
+        <section className="px-4 md:px-8 py-10">
+          <div className="flex items-end justify-between mb-8">
+            <h2 className="text-2xl font-black text-gray-900">الأكثر مبيعًا</h2>
+            <Link href="/products" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
               شوف الكل
             </Link>
           </div>
 
           {isLoadingFeatured ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="flex flex-col gap-2">
-                  <Skeleton className="aspect-square w-full rounded-2xl" />
-                  <Skeleton className="h-4 w-1/3 mt-2" />
-                  <Skeleton className="h-5 w-full" />
-                  <Skeleton className="h-4 w-1/4 mt-2" />
+                  <Skeleton className="aspect-square w-full rounded-xl" />
+                  <Skeleton className="h-3 w-1/3 mt-2" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/4" />
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
               {featuredProducts?.map((product, i) => (
                 <ProductCard key={product.id} product={product} index={i} />
               ))}
@@ -235,35 +152,44 @@ export default function Home() {
           )}
 
           <div className="mt-8 sm:hidden">
-            <Link href="/products" className="flex w-full items-center justify-center bg-gray-100 text-gray-900 font-semibold px-4 py-3 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all">
-              شوف جميع المنتجات
+            <Link
+              href="/products"
+              className="flex w-full items-center justify-center border border-gray-200 text-gray-700 font-medium px-4 py-3 rounded-full hover:border-gray-900 hover:text-gray-900 active:scale-[0.98] transition-all text-sm"
+            >
+              جميع المنتجات
             </Link>
           </div>
         </section>
 
         {/* Value Props */}
-        <section className="px-4 md:px-8 py-12 mb-8 bg-white border-y border-gray-100">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center max-w-4xl mx-auto">
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
-                <Zap className="w-6 h-6" />
+        <section className="px-4 md:px-8 py-12 border-t border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center shrink-0">
+                <Truck className="w-5 h-5 text-gray-700" />
               </div>
-              <h4 className="font-bold text-gray-900 mb-2">توصيل سريع</h4>
-              <p className="text-sm text-gray-500">تصلك طلبيتك خلال ٢–٣ أيام عمل.</p>
+              <div>
+                <h4 className="font-bold text-gray-900 mb-1">توصيل سريع</h4>
+                <p className="text-sm text-gray-500 leading-relaxed">تصلك طلبيتك خلال ٢–٣ أيام عمل.</p>
+              </div>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center mb-4">
-                <ShieldCheck className="w-6 h-6" />
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-gray-700" />
               </div>
-              <h4 className="font-bold text-gray-900 mb-2">١٠٠٪ أصلي</h4>
-              <p className="text-sm text-gray-500">كل زوج يتحقق منه قبل ما يخرج من عندنا.</p>
+              <div>
+                <h4 className="font-bold text-gray-900 mb-1">١٠٠٪ أصلي</h4>
+                <p className="text-sm text-gray-500 leading-relaxed">كل زوج يتحقق منه قبل ما يخرج من عندنا.</p>
+              </div>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
-                <Star className="w-6 h-6" />
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center shrink-0">
+                <RotateCcw className="w-5 h-5 text-gray-700" />
               </div>
-              <h4 className="font-bold text-gray-900 mb-2">جودة عالية</h4>
-              <p className="text-sm text-gray-500">مواد ممتازة وتشطيب أنيق في كل موديل.</p>
+              <div>
+                <h4 className="font-bold text-gray-900 mb-1">إرجاع مضمون</h4>
+                <p className="text-sm text-gray-500 leading-relaxed">ما رضيتيش؟ نقبلوا الإرجاع خلال ١٤ يوم.</p>
+              </div>
             </div>
           </div>
         </section>

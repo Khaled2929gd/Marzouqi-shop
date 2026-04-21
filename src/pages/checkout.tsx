@@ -10,6 +10,7 @@ import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ShieldCheck, Loader2, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 
 const checkoutSchema = z.object({
   customerPhone: z.string().min(8, "أدخل رقم هاتف صحيح"),
@@ -113,27 +114,24 @@ export default function Checkout() {
 
   return (
     <Layout title="إتمام الطلب" hideNav backButton>
-      <div className="flex flex-col lg:flex-row gap-8 px-4 md:px-8 py-6 w-full">
+      <div className="flex flex-col lg:flex-row gap-8 px-4 md:px-8 py-8 w-full">
 
         {/* Checkout Form */}
-        <div className="flex-1 lg:max-w-2xl">
+        <div className="flex-1 lg:max-w-xl">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-              <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                  <span className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-sm font-bold">١</span>
-                  معلومات التوصيل
-                </h3>
+              <div>
+                <h3 className="text-base font-bold text-gray-900 mb-5">معلومات التوصيل</h3>
                 <div className="space-y-4">
                   <FormField
                     control={form.control}
                     name="customerPhone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>رقم الهاتف</FormLabel>
+                        <FormLabel className="text-sm text-gray-600">رقم الهاتف</FormLabel>
                         <FormControl>
-                          <Input placeholder="06 12 34 56 78" className="h-12 bg-gray-50 border-transparent focus:bg-white" dir="ltr" {...field} />
+                          <Input placeholder="06 12 34 56 78" className="h-12 bg-gray-50 border-transparent rounded-xl focus:bg-white" dir="ltr" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -144,26 +142,23 @@ export default function Checkout() {
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>العنوان الكامل</FormLabel>
+                        <FormLabel className="text-sm text-gray-600">العنوان الكامل</FormLabel>
                         <FormControl>
-                          <Input placeholder="الدار، الحي، المدينة، الرمز البريدي..." className="h-12 bg-gray-50 border-transparent focus:bg-white" {...field} />
+                          <Input placeholder="الدار، الحي، المدينة..." className="h-12 bg-gray-50 border-transparent rounded-xl focus:bg-white" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <p className="text-xs text-gray-500">
-                    بلا تعقيد: غير الهاتف والعنوان، وحنا نكملوا ليك الطلب.
-                  </p>
                 </div>
               </div>
 
               {/* Mobile Pay Buttons */}
-              <div className="block lg:hidden space-y-3">
+              <div className="block lg:hidden space-y-3 pt-2">
                 <Button
                   type="submit"
                   disabled={createOrder.isPending}
-                  className="w-full h-14 rounded-full bg-gray-900 hover:bg-black text-white font-bold text-lg"
+                  className="w-full h-12 rounded-full bg-gray-900 hover:bg-black text-white font-semibold"
                 >
                   {createOrder.isPending
                     ? <Loader2 className="w-5 h-5 animate-spin" />
@@ -173,11 +168,11 @@ export default function Checkout() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full h-14 rounded-full font-bold text-base"
+                  className="w-full h-12 rounded-full font-medium border-gray-200"
                   onClick={form.handleSubmit(openWhatsAppOrder)}
                 >
-                  <MessageCircle className="w-5 h-5 me-2" />
-                  اطلب بواتساب (اختياري)
+                  <MessageCircle className="w-4 h-4 me-2" />
+                  اطلب بواتساب
                 </Button>
               </div>
             </form>
@@ -185,28 +180,28 @@ export default function Checkout() {
         </div>
 
         {/* Order Summary Sidebar */}
-        <div className="w-full lg:w-100 shrink-0">
-          <div className="bg-gray-50 rounded-3xl p-6 sticky top-24">
-            <h3 className="font-bold text-gray-900 mb-4">في سلتك</h3>
+        <div className="w-full lg:w-88 shrink-0">
+          <div className="bg-gray-50 rounded-2xl p-6 sticky top-24">
+            <h3 className="font-black text-gray-900 mb-5">في سلتك</h3>
 
-            <div className="space-y-4 mb-6 max-h-75 overflow-y-auto pe-2 custom-scrollbar">
+            <div className="space-y-3 mb-5 max-h-64 overflow-y-auto pe-1 custom-scrollbar">
               {items.map((item) => (
                 <div key={`${item.productId}-${item.size}`} className="flex gap-3">
-                  <div className="w-16 h-16 bg-white rounded-xl p-1 shrink-0 flex items-center justify-center border border-gray-100">
+                  <div className="w-14 h-14 bg-white rounded-xl p-1 shrink-0 flex items-center justify-center">
                     <img src={item.productImage} alt={item.productName} loading="lazy" decoding="async" width={128} height={128} className="w-full h-full object-contain" />
                   </div>
-                  <div className="flex-1 py-1">
-                    <h4 className="text-sm font-bold text-gray-900 line-clamp-1">{item.productName}</h4>
-                    <p className="text-xs text-gray-500">مقاس: {item.size} · كمية: {item.quantity}</p>
+                  <div className="flex-1 py-0.5">
+                    <h4 className="text-sm font-semibold text-gray-900 line-clamp-1">{item.productName}</h4>
+                    <p className="text-xs text-gray-400">مقاس {item.size} · ×{item.quantity}</p>
                     <p className="text-sm font-bold text-gray-900 mt-1" dir="ltr">${(item.price * item.quantity).toFixed(2)}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="h-px bg-gray-200 mb-6"></div>
+            <div className="h-px bg-gray-200 mb-5"></div>
 
-            <div className="space-y-3 mb-6 text-sm">
+            <div className="space-y-2 mb-5 text-sm">
               <div className="flex justify-between text-gray-600">
                 <span>المجموع</span>
                 <span className="font-medium text-gray-900" dir="ltr">${total.toFixed(2)}</span>
@@ -217,32 +212,32 @@ export default function Checkout() {
               </div>
             </div>
 
-            <div className="flex justify-between items-end mb-8">
+            <div className="flex justify-between items-center mb-6">
               <span className="text-gray-900 font-bold">الإجمالي</span>
-              <span className="text-2xl font-bold text-gray-900" dir="ltr">${finalTotal.toFixed(2)}</span>
+              <span className="text-2xl font-black text-gray-900" dir="ltr">${finalTotal.toFixed(2)}</span>
             </div>
 
             <div className="hidden lg:flex lg:flex-col lg:gap-3">
               <Button
                 onClick={form.handleSubmit(onSubmit)}
                 disabled={createOrder.isPending}
-                className="w-full h-14 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-lg"
+                className="w-full h-12 rounded-full bg-gray-900 hover:bg-black text-white font-semibold"
               >
                 {createOrder.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "تأكيد الطلب"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
-                className="w-full h-14 rounded-full font-bold text-base"
+                className="w-full h-12 rounded-full font-medium border-gray-200"
                 onClick={form.handleSubmit(openWhatsAppOrder)}
               >
-                <MessageCircle className="w-5 h-5 me-2" />
-                اطلب بواتساب (اختياري)
+                <MessageCircle className="w-4 h-4 me-2" />
+                اطلب بواتساب
               </Button>
             </div>
 
-            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
+              <ShieldCheck className="w-3.5 h-3.5" />
               دفع آمن وسهل
             </div>
           </div>
