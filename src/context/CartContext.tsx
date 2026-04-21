@@ -27,7 +27,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("soledrop-cart");
+      const saved = localStorage.getItem("marzouki-cart");
       if (saved) {
         setItems(JSON.parse(saved));
       }
@@ -39,7 +39,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem("soledrop-cart", JSON.stringify(items));
+      localStorage.setItem("marzouki-cart", JSON.stringify(items));
     }
   }, [items, isLoaded]);
 

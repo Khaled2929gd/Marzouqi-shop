@@ -51,7 +51,7 @@ export default function Products() {
   };
 
   return (
-    <Layout title="Lboutique">
+    <Layout title="La Boutique">
       <div className="flex flex-col md:flex-row gap-6 px-4 md:px-8 py-6 w-full">
         {/* Mobile Search & Filter Bar */}
         <div className="flex md:hidden gap-2">

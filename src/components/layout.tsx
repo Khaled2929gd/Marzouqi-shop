@@ -40,7 +40,7 @@ export function Layout({ children, hideNav = false, backButton = false, title }:
           {!isAdmin && (
             <nav className="flex items-center gap-6 mr-4" aria-label="Navigation principale">
               <Link href="/" className={`text-sm font-medium ${location === "/" ? "text-red-600" : "text-gray-600 hover:text-gray-900"}`}>Accueil</Link>
-              <Link href="/products" className={`text-sm font-medium ${location === "/products" ? "text-red-600" : "text-gray-600 hover:text-gray-900"}`}>Lboutique</Link>
+              <Link href="/products" className={`text-sm font-medium ${location === "/products" ? "text-red-600" : "text-gray-600 hover:text-gray-900"}`}>La Boutique</Link>
             </nav>
           )}
           
