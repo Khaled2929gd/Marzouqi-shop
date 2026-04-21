@@ -10,14 +10,13 @@ import { Button } from "@/components/ui/button";
 
 function getCategoryLabel(name: string): string {
   const labels: Record<string, string> = {
-    basketball: "Basket",
-    lifestyle: "Style yawmiy",
-    running: "Course",
-    casual: "Casual",
-    football: "Foot",
-    training: "Training",
+    basketball: "كرة السلة",
+    lifestyle: "ستايل يومي",
+    running: "الجري",
+    casual: "كاجوال",
+    football: "كرة القدم",
+    training: "تدريب",
   };
-
   return labels[name.toLowerCase()] || name;
 }
 
@@ -28,12 +27,9 @@ export default function Products() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [category, setCategory] = useState(initialCategory);
-  
-  // Debounce search
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search);
-    }, 500);
+    const timer = setTimeout(() => setDebouncedSearch(search), 500);
     return () => clearTimeout(timer);
   }, [search]);
 
@@ -51,41 +47,42 @@ export default function Products() {
   };
 
   return (
-    <Layout title="La Boutique">
+    <Layout title="المتجر">
       <div className="flex flex-col md:flex-row gap-6 px-4 md:px-8 py-6 w-full">
+
         {/* Mobile Search & Filter Bar */}
         <div className="flex md:hidden gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input 
-              placeholder="Qelleb 3la sneakers..." 
-              className="pl-9 bg-white border-gray-200 rounded-xl"
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              placeholder="ابحث عن سنيكرز..."
+              className="ps-9 bg-white border-gray-200 rounded-xl"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="shrink-0 rounded-xl border-gray-200" aria-label="Ouvrir les filtres">
+              <Button variant="outline" size="icon" className="shrink-0 rounded-xl border-gray-200" aria-label="فتح الفلاتر">
                 <SlidersHorizontal className="w-4 h-4" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
               <SheetHeader className="mb-6">
-                <SheetTitle>Filtres</SheetTitle>
+                <SheetTitle>الفلاتر</SheetTitle>
               </SheetHeader>
               <div className="space-y-6">
                 <div>
-                  <h4 className="font-semibold text-sm text-gray-900 mb-3">Categories</h4>
+                  <h4 className="font-semibold text-sm text-gray-900 mb-3">الأقسام</h4>
                   <div className="flex flex-wrap gap-2">
-                    <button 
+                    <button
                       onClick={() => setCategory("")}
                       className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${category === "" ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                     >
-                      Koulchi
+                      الكل
                     </button>
                     {categories?.map((cat) => (
-                      <button 
+                      <button
                         key={cat.id}
                         onClick={() => setCategory(cat.slug)}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${category === cat.slug ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
@@ -101,41 +98,39 @@ export default function Products() {
         </div>
 
         {/* Desktop Sidebar */}
-        <aside className="hidden md:block w-64 shrink-0">
+        <aside className="hidden md:block w-56 shrink-0">
           <div className="sticky top-24 space-y-8">
-            <div>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input 
-                  placeholder="Qelleb 3la produit..." 
-                  className="pl-9 bg-white border-gray-200"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                {search && (
-                  <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" aria-label="Effacer la recherche">
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+            <div className="relative">
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="ابحث عن منتج..."
+                className="ps-9 bg-white border-gray-200"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              {search && (
+                <button onClick={() => setSearch("")} className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" aria-label="مسح البحث">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-gray-900">Categories</h3>
+                <h3 className="font-bold text-gray-900">الأقسام</h3>
                 {category && (
-                  <button onClick={() => setCategory("")} className="text-xs text-red-600 font-medium">Hayed</button>
+                  <button onClick={() => setCategory("")} className="text-xs text-red-600 font-medium">مسح</button>
                 )}
               </div>
               <div className="space-y-2">
-                <button 
+                <button
                   onClick={() => setCategory("")}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${category === "" ? "bg-red-50 text-red-700" : "text-gray-600 hover:bg-gray-50"}`}
                 >
-                  <span>Ga3 lproduits</span>
+                  <span>جميع المنتجات</span>
                 </button>
                 {categories?.map((cat) => (
-                  <button 
+                  <button
                     key={cat.id}
                     onClick={() => setCategory(cat.slug)}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${category === cat.slug ? "bg-red-50 text-red-700" : "text-gray-600 hover:bg-gray-50"}`}
@@ -153,8 +148,8 @@ export default function Products() {
         <div className="flex-1">
           <div className="hidden items-center justify-between mb-6 md:flex">
             <h2 className="text-2xl font-bold text-gray-900">
-              {category ? getCategoryLabel(categories?.find(c => c.slug === category)?.name || "") : "Ga3 lproduits"}
-              <span className="text-gray-400 text-lg font-normal ml-2">
+              {category ? getCategoryLabel(categories?.find(c => c.slug === category)?.name || "") : "جميع المنتجات"}
+              <span className="text-gray-400 text-lg font-normal ms-2">
                 ({products?.length || 0})
               </span>
             </h2>
@@ -181,10 +176,10 @@ export default function Products() {
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <Search className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Ma l9inash produits</h3>
-              <p className="text-gray-500 max-w-sm mb-6">Makayn hata produit kaytna9el m3a had filtres.</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">ما لقيناش منتجات</h3>
+              <p className="text-gray-500 max-w-sm mb-6">ما كاين حتى منتج يتناسب مع هذه الفلاتر.</p>
               <Button onClick={handleClearFilters} variant="outline" className="rounded-full">
-                Hayed ga3 filtres
+                مسح الفلاتر
               </Button>
             </div>
           )}

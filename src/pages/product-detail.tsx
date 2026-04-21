@@ -10,16 +10,15 @@ import { useToast } from "@/hooks/use-toast";
 
 function getLocalizedProductDescription(productName: string, fallback: string): string {
   const descriptions: Record<string, string> = {
-    "Air Jordan 1 Retro High": "Model high-top iconique b cuir premium w confort mzyan kul nhar.",
-    "Yeezy Boost 350 V2": "Upper knit khfif m3a cushioning Boost bach tkon merta7 tul nhar.",
-    "Dunk Low Panda": "Colorway low-top classique, sahl tlebso m3a ay look dyal nhar.",
-    "New Balance 550": "Style vintage inspire mn terrain, b confort li kaynfa3 l isti3mal yawmiy.",
-    "Air Max 97 Silver Bullet": "Upper reflectif b layers m3a air unit kamla bach yban style.",
-    "Converse Chuck 70 High": "Canvas classique high-top b cushioning ahsan w details retro.",
-    "Gel-Kayano 30": "Chaussure stability l running, b foam n3im w transition smooth.",
-    "Puma Suede Classic": "Icone streetwear b suede n3im w lignes retro nadfin.",
+    "Air Jordan 1 Retro High": "موديل هاي توب أيقوني من جلد فاخر مع راحة يومية ممتازة.",
+    "Yeezy Boost 350 V2": "جزء علوي خفيف من الكنيت مع وسادة Boost للراحة طوال اليوم.",
+    "Dunk Low Panda": "لوك لو توب كلاسيكي بألوان مريحة، يتناسب مع أي تنسيق يومي.",
+    "New Balance 550": "ستايل فينتاج مستوحى من الملاعب مع راحة مثالية للاستخدام اليومي.",
+    "Air Max 97 Silver Bullet": "طبقات علوية عاكسة مع وحدة هواء كاملة لإطلالة مميزة.",
+    "Converse Chuck 70 High": "كانفاس كلاسيكي هاي توب مع وسادة محسّنة وتفاصيل ريترو.",
+    "Gel-Kayano 30": "حذاء ركض للثبات مع فوم ناعم وانتقال سلس.",
+    "Puma Suede Classic": "أيقونة ستريتوير من السويد الناعم بخطوط كلاسيكية أنيقة.",
   };
-
   return descriptions[productName] || fallback;
 }
 
@@ -27,7 +26,7 @@ export default function ProductDetail() {
   const [match, params] = useRoute("/products/:id");
   const id = match ? parseInt(params.id) : 0;
   const [, setLocation] = useLocation();
-  
+
   const { data: product, isLoading, isError } = useGetProduct(id, {
     query: { enabled: !!id, queryKey: getGetProductQueryKey(id) },
   });
@@ -68,11 +67,11 @@ export default function ProductDetail() {
   if (isError || !product) {
     return (
       <Layout backButton>
-        <div className="flex flex-col items-center justify-center py-20 px-4">
+        <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
           <AlertCircle className="w-12 h-12 text-rose-500 mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Produit ma kaynch</h2>
-          <p className="text-gray-500 mb-6">Yemken tms7 aw ma b9ach f stock.</p>
-          <Button onClick={() => setLocation("/products")}>Rj3 lboutique</Button>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">المنتج غير موجود</h2>
+          <p className="text-gray-500 mb-6">ربما حُذف أو نفذ من المخزن.</p>
+          <Button onClick={() => setLocation("/products")}>ارجع للمتجر</Button>
         </div>
       </Layout>
     );
@@ -83,13 +82,9 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!selectedSize) {
-      toast({
-        title: "Khtar pointure 9bel",
-        variant: "destructive",
-      });
+      toast({ title: "اختر المقاس أولًا", variant: "destructive" });
       return;
     }
-
     setIsAdding(true);
     addItem({
       productId: product.id,
@@ -99,25 +94,20 @@ export default function ProductDetail() {
       price: product.price,
       quantity: 1
     });
-
     setTimeout(() => {
       setIsAdding(false);
       toast({
-        title: "Tzad l panier",
-        description: `${product.name} (Pointure ${selectedSize})`,
+        title: "تمت الإضافة للسلة",
+        description: `${product.name} (مقاس ${selectedSize})`,
       });
     }, 600);
   };
 
   const handleBuyNow = () => {
     if (!selectedSize) {
-      toast({
-        title: "Khtar pointure 9bel",
-        variant: "destructive",
-      });
+      toast({ title: "اختر المقاس أولًا", variant: "destructive" });
       return;
     }
-    
     addItem({
       productId: product.id,
       productName: product.name,
@@ -126,14 +116,13 @@ export default function ProductDetail() {
       price: product.price,
       quantity: 1
     });
-    
     setLocation("/cart");
   };
 
   return (
     <Layout backButton hideNav>
       <div className="flex flex-col md:flex-row gap-0 md:gap-12 w-full pb-24 md:pb-12 md:p-8">
-        
+
         {/* Images */}
         <div className="w-full md:w-[55%] flex flex-col gap-4">
           <div className="relative aspect-square md:aspect-4/3 w-full bg-gray-50 md:rounded-3xl overflow-hidden flex items-center justify-center p-8">
@@ -154,29 +143,29 @@ export default function ProductDetail() {
                 className="w-full h-full object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)]"
               />
             </AnimatePresence>
-            
+
             {product.stock < 5 && product.stock > 0 && (
-              <div className="absolute top-4 left-4 bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-full">
-                Ba9i ghir {product.stock}!
+              <div className="absolute top-4 start-4 bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-full">
+                باقي غير {product.stock} فقط!
               </div>
             )}
             {product.stock === 0 && (
-              <div className="absolute top-4 left-4 bg-gray-900 text-white text-xs font-bold px-3 py-1.5 rounded-full">
-                Ma kaynch f stock
+              <div className="absolute top-4 start-4 bg-gray-900 text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                نفذ من المخزن
               </div>
             )}
           </div>
-          
+
           {images.length > 1 && (
             <div className="flex gap-3 px-4 md:px-0 overflow-x-auto snap-x scrollbar-hide py-2">
               {images.map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveImageIndex(i)}
-                  aria-label={`Afficher image ${i + 1} de ${product.name}`}
+                  aria-label={`عرض الصورة ${i + 1} من ${product.name}`}
                   className={`relative shrink-0 snap-start w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gray-50 overflow-hidden border-2 transition-all ${activeImageIndex === i ? "border-red-600 ring-2 ring-red-600/20" : "border-transparent hover:border-gray-200"}`}
                 >
-                  <img src={img} className="w-full h-full object-contain p-2" alt={`Thumbnail ${i + 1}`} loading="lazy" decoding="async" width={192} height={192} />
+                  <img src={img} className="w-full h-full object-contain p-2" alt={`صورة مصغرة ${i + 1}`} loading="lazy" decoding="async" width={192} height={192} />
                 </button>
               ))}
             </div>
@@ -191,21 +180,21 @@ export default function ProductDetail() {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-4">
             {product.name}
           </h1>
-          
+
           <div className="flex items-center gap-4 mb-6">
-            <div className="flex items-baseline gap-2">
+            <div className="flex items-baseline gap-2" dir="ltr">
               <span className="text-3xl font-bold text-gray-900">${product.price.toFixed(2)}</span>
               {product.originalPrice && product.originalPrice > product.price && (
                 <span className="text-lg text-gray-400 line-through">${product.originalPrice.toFixed(2)}</span>
               )}
             </div>
-            
+
             <div className="w-px h-6 bg-gray-200"></div>
-            
+
             <div className="flex items-center gap-1.5">
               <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
               <span className="font-bold text-gray-900">{product.rating.toFixed(1)}</span>
-              <span className="text-gray-500 text-sm">({product.reviewCount} avis)</span>
+              <span className="text-gray-500 text-sm">({product.reviewCount} تقييم)</span>
             </div>
           </div>
 
@@ -213,8 +202,8 @@ export default function ProductDetail() {
 
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Khtar pointure</h3>
-              <button className="text-sm text-gray-500 underline underline-offset-4 hover:text-gray-900">Guide des tailles</button>
+              <h3 className="font-semibold text-gray-900">اختر المقاس</h3>
+              <button className="text-sm text-gray-500 underline underline-offset-4 hover:text-gray-900">دليل المقاسات</button>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
               {product.sizes.map((size) => (
@@ -223,8 +212,8 @@ export default function ProductDetail() {
                   onClick={() => setSelectedSize(size)}
                   className={`
                     relative h-14 rounded-xl flex items-center justify-center text-lg font-medium transition-all
-                    ${selectedSize === size 
-                      ? "bg-red-600 text-white shadow-[0_4px_14px_rgba(220,38,38,0.3)] ring-2 ring-red-600 ring-offset-2" 
+                    ${selectedSize === size
+                      ? "bg-red-600 text-white shadow-[0_4px_14px_rgba(220,38,38,0.3)] ring-2 ring-red-600 ring-offset-2"
                       : "bg-gray-50 text-gray-900 border border-gray-100 hover:bg-gray-100 hover:border-gray-200"}
                   `}
                 >
@@ -239,15 +228,15 @@ export default function ProductDetail() {
             <div className="flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-semibold text-sm text-gray-900">Garantie d'authenticite</h4>
-                <p className="text-xs text-gray-500 mt-1">Kol produit kaytverifa 9bel livraison.</p>
+                <h4 className="font-semibold text-sm text-gray-900">ضمان الأصالة</h4>
+                <p className="text-xs text-gray-500 mt-1">كل منتج يتحقق منه قبل التوصيل.</p>
               </div>
             </div>
           </div>
 
-          {/* Action Buttons - Fixed to bottom on mobile */}
+          {/* Action Buttons */}
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-lg border-t border-gray-100 md:relative md:bg-transparent md:border-0 md:p-0 z-40 flex gap-3">
-            <Button 
+            <Button
               onClick={handleAddToCart}
               disabled={product.stock === 0 || isAdding}
               variant="outline"
@@ -259,18 +248,18 @@ export default function ProductDetail() {
                 </motion.div>
               ) : (
                 <>
-                  <ShoppingBag className="w-5 h-5 mr-2" />
-                  Zid l panier
+                  <ShoppingBag className="w-5 h-5 me-2" />
+                  أضف للسلة
                 </>
               )}
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={handleBuyNow}
               disabled={product.stock === 0}
               className="flex-1 h-14 rounded-full bg-gray-900 hover:bg-black text-white text-base font-bold shadow-lg"
             >
-              Chri daba
+              اشتري الآن
             </Button>
           </div>
         </div>

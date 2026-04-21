@@ -112,7 +112,7 @@
   --sidebar-border: 240 3.7% 15.9%;
   --sidebar-ring: 0 73% 52%;
 
-  --app-font-sans: 'Google Sans', 'Product Sans', 'Segoe UI', 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  --app-font-sans: 'Cairo', 'Segoe UI', 'Noto Sans Arabic', sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
   --radius: 0.75rem;
@@ -274,6 +274,11 @@
   /* Safe-area bottom padding for iOS notch/home indicator */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Flip directional icons (arrows) in RTL context */
+  [dir="rtl"] .rtl-flip {
+    transform: scaleX(-1);
   }
 
   /* Hide ugly search cancel button in Chrome until we can style it properly */
