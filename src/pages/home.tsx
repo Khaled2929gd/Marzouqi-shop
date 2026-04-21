@@ -3,7 +3,6 @@ import { Layout } from "../components/layout";
 import { ProductCard } from "../components/product-card";
 import { Link } from "wouter";
 import { ArrowLeft, ShieldCheck, Truck, RotateCcw } from "lucide-react";
-import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function getCategoryLabel(name: string): string {
@@ -26,75 +25,22 @@ export default function Home() {
     <Layout>
       <div className="flex-1 w-full">
 
-        {/* Hero — editorial split */}
-        <section className="flex flex-col md:flex-row min-h-[480px] md:min-h-[560px] border-b border-gray-100">
-
-          {/* Text side (start = right in RTL) */}
-          <div className="flex-1 flex flex-col justify-center px-6 md:px-14 py-12 md:py-20 order-2 md:order-1">
-            <motion.p
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="text-[11px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-5"
-            >
-              كوليكشن 2025
-            </motion.p>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.08 }}
-              className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 leading-[1.05] tracking-tight mb-5"
-            >
-              سنيكرز<br />
-              بريميوم.
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.16 }}
-              className="text-gray-500 text-base max-w-xs mb-8 leading-relaxed"
-            >
-              أحذية أصلية مختارة، تصلك لباب الدار.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.24 }}
-              className="flex items-center gap-3"
-            >
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-2 bg-gray-900 hover:bg-black active:scale-95 text-white font-semibold px-7 py-3 rounded-full transition-all text-sm"
-              >
-                اكتشف المتجر
-                <ArrowLeft className="w-4 h-4 rtl-flip" />
-              </Link>
-            </motion.div>
-          </div>
-
-          {/* Image side (end = left in RTL) */}
-          <div className="relative flex-1 bg-[#f5f5f5] flex items-center justify-center p-8 md:p-12 min-h-[300px] order-1 md:order-2">
-            <motion.img
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              src="/images/shoe-1.png"
-              alt="سنيكر مميز"
-              width={900}
-              height={700}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              className="relative z-10 w-full max-w-[260px] md:max-w-[400px] drop-shadow-xl rotate-6"
-            />
-            <div className="absolute bottom-6 end-6 bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm">
-              <p className="text-[10px] text-gray-400 mb-0.5">ابتداءً من</p>
-              <p className="font-black text-gray-900 text-lg leading-none" dir="ltr">89<span className="text-gray-400 text-sm font-medium">$</span></p>
-            </div>
-          </div>
+        {/* Hero */}
+        <section className="px-6 md:px-14 py-16 md:py-24 border-b border-gray-100">
+          <p className="text-xs font-medium text-gray-400 uppercase tracking-[0.2em] mb-5">كوليكشن 2025</p>
+          <h1 className="text-4xl md:text-6xl font-black text-gray-900 leading-[1.08] mb-5">
+            سنيكرز بريميوم.
+          </h1>
+          <p className="text-gray-400 text-sm mb-8 max-w-xs leading-relaxed">
+            أحذية أصلية مختارة، تصلك لباب الدار.
+          </p>
+          <Link
+            href="/products"
+            className="inline-flex items-center gap-2 bg-gray-900 hover:bg-black active:scale-95 text-white font-medium px-6 py-2.5 rounded-full transition-all text-sm"
+          >
+            اكتشف المتجر
+            <ArrowLeft className="w-4 h-4 rtl-flip" />
+          </Link>
         </section>
 
         {/* Categories */}
