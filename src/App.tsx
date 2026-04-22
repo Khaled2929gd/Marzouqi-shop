@@ -22,19 +22,22 @@ const NotFound = lazy(() => import("./pages/not-found"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 1000 * 60 * 5,   // data stays fresh for 5 min — no refetch on nav back
+      gcTime: 1000 * 60 * 10,     // keep unused cache for 10 min
       retry: 1,
       refetchOnWindowFocus: false,
     },
   },
 });
 
+const RouteFallback = () => (
+  <div className="flex min-h-dvh items-center justify-center bg-white" role="status" aria-live="polite">
+    <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-gray-900" />
+    <span className="sr-only">جاري التحميل...</span>
+  </div>
+);
+
 function Router() {
-  const RouteFallback = () => (
-    <div className="flex min-h-dvh items-center justify-center bg-gray-50" role="status" aria-live="polite">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-red-600" />
-      <span className="sr-only">Chargement...</span>
-    </div>
-  );
 
   const HomeRoute = () => (
     <Suspense fallback={<RouteFallback />}>

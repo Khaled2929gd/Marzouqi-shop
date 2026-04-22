@@ -17,5 +17,27 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // Recharts only used in admin — isolate it so storefront users never download it
+          if (id.includes("recharts") || id.includes("victory-vendor")) {
+            return "recharts";
+          }
+          // Keep React core in its own chunk — cached across deployments
+          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) {
+            return "react-core";
+          }
+          // Radix UI primitives in one vendor chunk
+          if (id.includes("@radix-ui")) {
+            return "radix-ui";
+          }
+          // Framer Motion separate — only loads on pages that animate
+          if (id.includes("framer-motion")) {
+            return "framer-motion";
+          }
+        },
+      },
+    },
   },
 });
