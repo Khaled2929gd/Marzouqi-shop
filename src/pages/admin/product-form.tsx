@@ -24,11 +24,11 @@ import { useToast } from "@/hooks/use-toast";
 const productSchema = z.object({
   name: z.string().min(2, "Nom requis"),
   brand: z.string().min(2, "Marque requise"),
-  description: z.string().min(10, "Description requise"),
+  description: z.string().optional().default(""),
   price: z.coerce.number().min(0.01, "Prix doit être supérieur à 0"),
   originalPrice: z.coerce.number().optional().nullable(),
   imageUrl: z.string().url("URL invalide"),
-  category: z.string().min(1, "Catégorie requise"),
+  category: z.string().optional().default(""),
   sizes: z.string().min(1, "Pointures requises"),
   stock: z.coerce.number().min(0, "Stock ne peut pas être négatif"),
   featured: z.boolean().default(false)
@@ -221,260 +221,204 @@ export default function AdminProductForm() {
 
   return (
     <Layout title={isEdit ? "Modifier Produit" : "Nouveau Produit"}>
-      <div className="px-4 md:px-8 py-6 w-full max-w-3xl mx-auto pb-24 md:pb-12">
-        <Button
-          variant="ghost"
-          className="mb-6 -ml-4 hover:bg-transparent hover:text-red-600"
-          onClick={() => window.history.back()}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Retour
-        </Button>
+      <div className="px-4 md:px-8 py-8 w-full max-w-2xl mx-auto">
 
-        <div className="bg-white border border-gray-100 p-5 md:p-8 rounded-3xl shadow-sm">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
 
-              {/* Product name + AI auto-fill */}
+            {/* Name + Auto-fill */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom du produit</FormLabel>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <Input placeholder="Air Jordan 1 High" className="flex-1" {...field} />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="shrink-0 gap-1.5 text-purple-700 border-purple-200 hover:bg-purple-50"
+                      onClick={handleAutoFill}
+                      disabled={isAutoFilling}
+                    >
+                      {isAutoFilling ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                      <span className="hidden sm:inline text-sm">Auto-fill</span>
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Brand + Category */}
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="name"
+                name="brand"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nom du produit</FormLabel>
-                    <div className="flex gap-2">
+                    <FormLabel>Marque</FormLabel>
+                    <FormControl><Input placeholder="Nike" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">Catégorie <span className="text-xs font-normal">(optionnel)</span></FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <Input placeholder="Air Jordan 1 High" className="flex-1" {...field} />
+                        <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                       </FormControl>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="shrink-0 rounded-xl border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 gap-1.5"
-                        onClick={handleAutoFill}
-                        disabled={isAutoFilling}
-                        title="Remplir automatiquement avec l'IA (français)"
-                      >
-                        {isAutoFilling
-                          ? <Loader2 className="w-4 h-4 animate-spin" />
-                          : <Sparkles className="w-4 h-4" />
-                        }
-                        <span className="hidden sm:inline text-sm font-medium">
-                          {isAutoFilling ? "En cours…" : "Auto-fill"}
-                        </span>
+                      <SelectContent>
+                        {categories?.map(cat => (
+                          <SelectItem key={cat.id} value={cat.slug}>{cat.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Price + Original price + Stock */}
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Prix ($)</FormLabel>
+                    <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="originalPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">Barré ($) <span className="text-xs font-normal">(opt.)</span></FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number" step="0.01" placeholder="—"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="stock"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stock</FormLabel>
+                    <FormControl><Input type="number" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Sizes */}
+            <FormField
+              control={form.control}
+              name="sizes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Pointures (séparées par virgule)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="38, 39, 40, 41, 42, 43" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Image */}
+            <FormField
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image</FormLabel>
+                  <div className="flex gap-3">
+                    <div className="shrink-0 w-20 h-20 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden">
+                      {previewUrl
+                        ? <img src={previewUrl} alt="Aperçu" className="w-full h-full object-contain p-1" onError={() => setPreviewUrl(null)} />
+                        : <ImageIcon className="w-6 h-6 text-gray-300" />
+                      }
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <FormControl>
+                        <Input placeholder="https://… ou /images/shoe.png" {...field} />
+                      </FormControl>
+                      <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleImageUpload} />
+                      <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={() => imageInputRef.current?.click()} disabled={isUploadingImage}>
+                        {isUploadingImage ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-1.5" />}
+                        {isUploadingImage ? "Upload…" : "Uploader"}
                       </Button>
                     </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="brand"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Marque</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nike" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Catégorie</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories?.map(cat => (
-                            <SelectItem key={cat.id} value={cat.slug}>{cat.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            {/* Description — optional, collapsed */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-500">Description <span className="text-xs font-normal">(optionnel)</span></FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Description du produit…" className="resize-none h-20" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Description du produit en français…" className="resize-none h-24" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* Featured */}
+            <FormField
+              control={form.control}
+              name="featured"
+              render={({ field }) => (
+                <FormItem className="flex items-center gap-3 space-y-0">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <FormLabel className="font-normal cursor-pointer">Produit en vedette (page d'accueil)</FormLabel>
+                </FormItem>
+              )}
+            />
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prix ($)</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.01" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="originalPrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prix barré ($)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="Optionnel"
-                          {...field}
-                          value={field.value ?? ""}
-                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="stock"
-                  render={({ field }) => (
-                    <FormItem className="col-span-2 sm:col-span-1">
-                      <FormLabel>Stock</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            {/* Actions */}
+            <div className="flex justify-end gap-3 pt-2">
+              <Button type="button" variant="outline" onClick={() => setLocation("/admin/products")} className="rounded-full">
+                Annuler
+              </Button>
+              <Button type="submit" disabled={isPending} className="rounded-full">
+                {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {isEdit ? "Enregistrer" : "Créer"}
+              </Button>
+            </div>
 
-              <FormField
-                control={form.control}
-                name="sizes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pointures (séparées par virgule)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="38, 39, 40, 41, 42, 43" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Image upload with preview */}
-              <FormField
-                control={form.control}
-                name="imageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Image du produit</FormLabel>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      {/* Preview box */}
-                      <div className="shrink-0 w-full sm:w-32 h-32 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden">
-                        {previewUrl ? (
-                          <img
-                            src={previewUrl}
-                            alt="Aperçu"
-                            className="w-full h-full object-contain p-2"
-                            onError={() => setPreviewUrl(null)}
-                          />
-                        ) : (
-                          <ImageIcon className="w-8 h-8 text-gray-300" />
-                        )}
-                      </div>
-                      <div className="flex-1 space-y-3">
-                        <FormControl>
-                          <Input placeholder="https://… ou /images/shoe.png" {...field} />
-                        </FormControl>
-                        <input
-                          ref={imageInputRef}
-                          type="file"
-                          accept="image/png,image/jpeg,image/webp"
-                          className="hidden"
-                          onChange={handleImageUpload}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="rounded-full w-full sm:w-auto"
-                          onClick={() => imageInputRef.current?.click()}
-                          disabled={isUploadingImage}
-                        >
-                          {isUploadingImage
-                            ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            : <Upload className="w-4 h-4 mr-2" />
-                          }
-                          {isUploadingImage ? "Upload en cours…" : "Uploader une image"}
-                        </Button>
-                      </div>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="featured"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-xl border border-gray-100 p-4">
-                    <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Produit en vedette</FormLabel>
-                      <p className="text-sm text-gray-500">
-                        Ce produit apparaîtra dans la section tendances de la page d'accueil.
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              <div className="pt-4 flex flex-col-reverse sm:flex-row justify-end gap-3 border-t border-gray-100">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setLocation("/admin/products")}
-                  className="rounded-full"
-                >
-                  Annuler
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isPending}
-                  className="rounded-full bg-red-600 hover:bg-red-700"
-                >
-                  {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  {isEdit ? "Enregistrer" : "Créer le produit"}
-                </Button>
-              </div>
-
-            </form>
-          </Form>
-        </div>
+          </form>
+        </Form>
       </div>
     </Layout>
   );
