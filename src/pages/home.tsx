@@ -26,21 +26,22 @@ export default function Home() {
       <div className="flex-1 w-full">
 
         {/* Hero */}
-        <section className="px-6 md:px-14 py-16 md:py-24 border-b border-gray-100">
-          <p className="text-xs font-medium text-gray-400 uppercase tracking-[0.2em] mb-5">كوليكشن 2025</p>
-          <h1 className="text-4xl md:text-6xl font-black text-gray-900 leading-[1.08] mb-5">
-            سنيكرز بريميوم.
-          </h1>
-          <p className="text-gray-400 text-sm mb-8 max-w-xs leading-relaxed">
-            أحذية أصلية مختارة، تصلك لباب الدار.
-          </p>
-          <Link
-            href="/products"
-            className="inline-flex items-center gap-2 bg-gray-900 hover:bg-black active:scale-95 text-white font-medium px-6 py-2.5 rounded-full transition-all text-sm"
-          >
-            اكتشف المتجر
-            <ArrowLeft className="w-4 h-4 rtl-flip" />
-          </Link>
+        <section
+          className="relative min-h-[480px] md:min-h-[560px] flex items-end md:items-center border-b border-gray-100 overflow-hidden"
+          style={{ backgroundImage: "url('/images/shoe-1.png')", backgroundSize: "40%", backgroundRepeat: "no-repeat", backgroundPosition: "left 5% center" }}
+        >
+          <div className="relative z-10 px-6 md:px-14 py-14 md:py-0 md:ms-auto md:w-1/2">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 leading-[1.05] mb-6">
+              سنيكرز<br />بريميوم.
+            </h1>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 bg-gray-900 hover:bg-black active:scale-95 text-white font-medium px-7 py-3 rounded-full transition-all text-sm"
+            >
+              اكتشف المتجر
+              <ArrowLeft className="w-4 h-4 rtl-flip" />
+            </Link>
+          </div>
         </section>
 
         {/* Categories */}
