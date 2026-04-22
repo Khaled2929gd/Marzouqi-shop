@@ -8,7 +8,7 @@
 
 do $$
 declare
-  v_admin_email text := 'admin@yourdomain.com';
+  v_admin_email text := 'admin@marzouki.site';
   v_user_id uuid;
 begin
   select u.id
