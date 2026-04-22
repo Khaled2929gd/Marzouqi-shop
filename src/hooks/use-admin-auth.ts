@@ -56,15 +56,21 @@ async function resolveCurrentState(): Promise<AdminAuthState> {
     return NOT_LOGGED_IN;
   }
 
-  // Profile fetch has its own 5s timeout — never blocks the UI if DB is slow
-  const profileResult = await withTimeout(
+  type ProfileResult = { data: AdminProfile | null; error: { message: string } | null };
+
+  // Promise.resolve() wraps the PromiseLike from PostgrestBuilder into a real Promise
+  const profilePromise: Promise<ProfileResult> = Promise.resolve(
     supabase
       .from("profiles")
       .select("role, email, full_name")
       .eq("id", user.id)
-      .maybeSingle<AdminProfile>(),
+      .maybeSingle<AdminProfile>()
+  ).then((res) => ({ data: res.data as AdminProfile | null, error: res.error }));
+
+  const profileResult = await withTimeout<ProfileResult>(
+    profilePromise,
     5000,
-    { data: null, error: { message: "Profile fetch timed out" } as any }
+    { data: null, error: { message: "Profile fetch timed out" } }
   );
 
   if (profileResult.error) {
@@ -72,11 +78,12 @@ async function resolveCurrentState(): Promise<AdminAuthState> {
     return { isLoading: false, user, profile: null, isAdmin: false, error: null };
   }
 
+  const profile = profileResult.data;
   return {
     isLoading: false,
     user,
-    profile: profileResult.data ?? null,
-    isAdmin: profileResult.data?.role === "admin",
+    profile: profile ?? null,
+    isAdmin: profile?.role === "admin",
     error: null,
   };
 }
