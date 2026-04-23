@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { MessageCircle, Phone, MapPin, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  normalizePhone,
+  formatPhoneInternational,
+  formatPhoneForWhatsApp,
+} from "@/lib/utils";
 
 const WHATSAPP_ORDER_PHONE = import.meta.env.VITE_WHATSAPP_ORDER_PHONE || "";
-
-function normalizePhone(phone: string): string {
-  return phone.replace(/[^\d]/g, "");
-}
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
@@ -51,6 +52,7 @@ export default function Checkout() {
     if (!validatePhone(phone)) return;
 
     const normalizedPhone = normalizePhone(phone);
+    const internationalPhone = formatPhoneInternational(phone);
     const now = Date.now();
     const customerTag = normalizedPhone.slice(-4) || `${now}`.slice(-4);
     const generatedName = `عميل-${customerTag}`;
@@ -61,7 +63,7 @@ export default function Checkout() {
         data: {
           customerName: generatedName,
           customerEmail: generatedEmail,
-          customerPhone: phone,
+          customerPhone: internationalPhone,
           address: address || "سيتم التواصل",
           city: "المغرب",
           discountCode: undefined,
@@ -100,6 +102,8 @@ export default function Checkout() {
       return;
     }
 
+    const internationalPhone = formatPhoneInternational(phone);
+
     const lines = [
       "السلام عليكم، بغيت ندير طلب:",
       "",
@@ -110,11 +114,11 @@ export default function Checkout() {
       "",
       `المجموع: ${finalTotal.toFixed(2)}$`,
       "",
-      `رقم الهاتف: ${phone}`,
+      `رقم الهاتف: ${internationalPhone}`,
       address ? `العنوان: ${address}` : "",
     ];
 
-    const targetNumber = normalizePhone(WHATSAPP_ORDER_PHONE);
+    const targetNumber = formatPhoneForWhatsApp(WHATSAPP_ORDER_PHONE);
     const text = encodeURIComponent(lines.filter(Boolean).join("\n"));
     window.open(
       `https://wa.me/${targetNumber}?text=${text}`,

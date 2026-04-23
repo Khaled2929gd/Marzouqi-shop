@@ -14,7 +14,7 @@ import {
   Banknote,
   MessageCircle,
 } from "lucide-react";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, formatPhoneForWhatsApp } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -265,10 +265,9 @@ export default function ProductDetail() {
               </p>
             </div>
             <a
-              href={`https://wa.me/${import.meta.env.VITE_WHATSAPP_ORDER_PHONE || ""}`.replace(
-                /\s/g,
-                "",
-              )}
+              href={`https://wa.me/${formatPhoneForWhatsApp(
+                import.meta.env.VITE_WHATSAPP_ORDER_PHONE || "",
+              )}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 text-xs text-[#ff616d] hover:text-[#ff5563] transition-colors"

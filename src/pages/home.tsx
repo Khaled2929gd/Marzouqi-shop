@@ -8,6 +8,7 @@ import { Link } from "wouter";
 import { ShieldCheck, Truck, Banknote } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FaWhatsapp } from "react-icons/fa";
+import { formatPhoneForWhatsApp } from "@/lib/utils";
 
 function getCategoryLabel(name: string): string {
   const labels: Record<string, string> = {
@@ -21,9 +22,8 @@ function getCategoryLabel(name: string): string {
   return labels[name.toLowerCase()] || name;
 }
 
-const WA_NUMBER = (import.meta.env.VITE_WHATSAPP_ORDER_PHONE || "").replace(
-  /\s/g,
-  "",
+const WA_NUMBER = formatPhoneForWhatsApp(
+  import.meta.env.VITE_WHATSAPP_ORDER_PHONE || "",
 );
 
 export default function Home() {
