@@ -1,8 +1,17 @@
-import { useGetFeaturedProducts, useListCategories } from "@workspace/api-client-react";
+import {
+  useGetFeaturedProducts,
+  useListCategories,
+} from "@workspace/api-client-react";
 import { Layout } from "../components/layout";
 import { ProductCard } from "../components/product-card";
 import { Link } from "wouter";
-import { ArrowLeft, ShieldCheck, Truck, RotateCcw } from "lucide-react";
+import {
+  ArrowLeft,
+  ShieldCheck,
+  Truck,
+  Banknote,
+  MessageCircle,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function getCategoryLabel(name: string): string {
@@ -18,34 +27,70 @@ function getCategoryLabel(name: string): string {
 }
 
 export default function Home() {
-  const { data: featuredProducts, isLoading: isLoadingFeatured } = useGetFeaturedProducts();
-  const { data: categories, isLoading: isLoadingCategories } = useListCategories();
+  const { data: featuredProducts, isLoading: isLoadingFeatured } =
+    useGetFeaturedProducts();
+  const { data: categories, isLoading: isLoadingCategories } =
+    useListCategories();
 
   return (
     <Layout>
-      <div className="flex-1 w-full">
-
+      <div className="flex-1 w-full justify-center">
         {/* Hero */}
-        <section
-          className="relative min-h-[480px] md:min-h-[560px] flex items-end md:items-center border-b border-gray-100 overflow-hidden"
-          style={{ backgroundImage: "url('/images/shoe-1.png')", backgroundSize: "40%", backgroundRepeat: "no-repeat", backgroundPosition: "left 5% center" }}
-        >
-          <div className="relative z-10 px-6 md:px-14 py-14 md:py-0 md:ms-auto md:w-1/2">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 leading-[1.05] mb-6">
-              سنيكرز<br />بريميوم.
+        <section className="relative px-4 md:px-8 py-16 md:py-28 border-b border-[#1e1a16] overflow-hidden min-h-[420px] flex items-center">
+          <img
+            src="/heroo.png"
+            alt=""
+            aria-hidden="true"
+            fetchPriority="high"
+            loading="eager"
+            decoding="async"
+            width={1600}
+            height={900}
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative z-10 max-w-xl">
+            <h1 className="text-3xl md:text-5xl font-black text-white leading-[1.12] mb-4 drop-shadow-lg">
+              أفضل أنواع الأحذية فكلميم وبأثمنة متلقاش بحالها
             </h1>
-            <Link
-              href="/products"
-              className="inline-flex items-center gap-2 bg-gray-900 hover:bg-black active:scale-95 text-white font-medium px-7 py-3 rounded-full transition-all text-sm"
-            >
-              اكتشف المتجر
-              <ArrowLeft className="w-4 h-4 rtl-flip" />
-            </Link>
+            <p className="text-white/80 text-sm mb-3 leading-relaxed">
+              ضرب دويرة فالمتجر وشوف ليك شي حاجة
+            </p>
+            <div className="flex flex-wrap gap-3 mb-8 text-xs text-white/70">
+              <span className="flex items-center gap-1.5">
+                <span className="text-[#ff8b95]">✓</span> الدفع عند الاستلام
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="text-[#ff8b95]">✓</span> توصيل لكلميم والجهة
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="text-[#ff8b95]">✓</span> أصلي 100%
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-2 bg-[#ff616d] hover:bg-[#ff5563] active:scale-95 text-white font-bold px-6 py-3 rounded-full transition-all text-sm shadow-lg"
+              >
+                كوموندي دبا <ArrowLeft className="w-4 h-4 rtl-flip" />
+              </Link>
+              <a
+                href={`https://wa.me/${import.meta.env.VITE_WHATSAPP_ORDER_PHONE || ""}`.replace(
+                  /\s/g,
+                  "",
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 backdrop-blur-sm border border-white/20 text-white font-bold px-6 py-3 rounded-full transition-all text-sm"
+              >
+                <MessageCircle className="w-4 h-4" /> اطلب بواتساب
+              </a>
+            </div>
           </div>
         </section>
 
-        {/* Categories */}
-        <section className="px-4 md:px-8 py-8 border-b border-gray-100">
+        {/* Category pills */}
+        <section className="px-4 md:px-8 py-6 border-b border-[#1e1a16]">
           <div className="flex overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 gap-2 snap-x scrollbar-hide">
             {isLoadingCategories ? (
               Array.from({ length: 5 }).map((_, i) => (
@@ -53,14 +98,17 @@ export default function Home() {
               ))
             ) : (
               <>
-                <Link href="/products" className="shrink-0 snap-start bg-gray-900 text-white px-5 py-2 rounded-full font-medium text-sm transition-colors">
+                <Link
+                  href="/products"
+                  className="shrink-0 snap-start bg-[#ff616d] text-white px-5 py-2 rounded-full font-medium text-sm"
+                >
                   الكل
                 </Link>
                 {categories?.map((category) => (
                   <Link
                     key={category.id}
                     href={`/products?category=${category.slug}`}
-                    className="shrink-0 snap-start bg-white border border-gray-200 text-gray-700 px-5 py-2 rounded-full font-medium text-sm hover:border-gray-900 hover:text-gray-900 transition-colors"
+                    className="shrink-0 snap-start bg-[#1c1916] border border-[#2a2520] text-[#c4b5ac] px-5 py-2 rounded-full font-medium text-sm hover:border-[#ff616d] hover:text-[#ff616d] transition-colors"
                   >
                     {getCategoryLabel(category.name)}
                   </Link>
@@ -70,15 +118,19 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Featured Products */}
+        {/* Featured products */}
         <section className="px-4 md:px-8 py-10">
           <div className="flex items-end justify-between mb-8">
-            <h2 className="text-2xl font-black text-gray-900">الأكثر مبيعًا</h2>
-            <Link href="/products" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+            <h2 className="text-2xl font-black text-[#f0e8e0]">
+              الأكثر مبيعًا
+            </h2>
+            <Link
+              href="/products"
+              className="text-sm text-[#9a8880] hover:text-[#ff616d] transition-colors"
+            >
               شوف الكل
             </Link>
           </div>
-
           {isLoadingFeatured ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -91,56 +143,66 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {featuredProducts?.map((product, i) => (
                 <ProductCard key={product.id} product={product} index={i} />
               ))}
             </div>
           )}
-
-          <div className="mt-8 sm:hidden">
+          <div className="mt-8 md:hidden">
             <Link
               href="/products"
-              className="flex w-full items-center justify-center border border-gray-200 text-gray-700 font-medium px-4 py-3 rounded-full hover:border-gray-900 hover:text-gray-900 active:scale-[0.98] transition-all text-sm"
+              className="flex w-full items-center justify-center border border-[#2a2520] text-[#c4b5ac] font-medium px-4 py-3 rounded-full hover:border-[#ff616d] hover:text-[#ff616d] active:scale-[0.98] transition-all text-sm"
             >
               جميع المنتجات
             </Link>
           </div>
         </section>
 
-        {/* Value Props */}
-        <section className="px-4 md:px-8 py-12 border-t border-gray-100">
+        {/* Trust features */}
+        <section className="px-4 md:px-8 py-12 border-t border-[#1e1a16]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center shrink-0">
-                <Truck className="w-5 h-5 text-gray-700" />
+              <div className="w-10 h-10 bg-[#2a1210] rounded-xl flex items-center justify-center shrink-0">
+                <Banknote className="w-5 h-5 text-[#ff616d]" />
               </div>
               <div>
-                <h4 className="font-bold text-gray-900 mb-1">توصيل سريع</h4>
-                <p className="text-sm text-gray-500 leading-relaxed">تصلك طلبيتك خلال ٢–٣ أيام عمل.</p>
+                <h4 className="font-bold text-[#f0e8e0] mb-1">
+                  الدفع عند الاستلام
+                </h4>
+                <p className="text-sm text-[#9a8880] leading-relaxed">
+                  ما خصك تدفع دبا — تدفع فقط منين تجيك الطلبية.
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-5 h-5 text-gray-700" />
+              <div className="w-10 h-10 bg-[#1c1916] rounded-xl flex items-center justify-center shrink-0">
+                <Truck className="w-5 h-5 text-[#f0e8e0]" />
               </div>
               <div>
-                <h4 className="font-bold text-gray-900 mb-1">١٠٠٪ أصلي</h4>
-                <p className="text-sm text-gray-500 leading-relaxed">كل زوج يتحقق منه قبل ما يخرج من عندنا.</p>
+                <h4 className="font-bold text-[#f0e8e0] mb-1">
+                  توصيل لكلميم والجهة
+                </h4>
+                <p className="text-sm text-[#9a8880] leading-relaxed">
+                  تصلك طلبيتك فـ ١–٣ أيام عمل لباب الدار.
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center shrink-0">
-                <RotateCcw className="w-5 h-5 text-gray-700" />
+              <div className="w-10 h-10 bg-[#1c1916] rounded-xl flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-[#f0e8e0]" />
               </div>
               <div>
-                <h4 className="font-bold text-gray-900 mb-1">إرجاع مضمون</h4>
-                <p className="text-sm text-gray-500 leading-relaxed">ما رضيتيش؟ نقبلوا الإرجاع خلال ١٤ يوم.</p>
+                <h4 className="font-bold text-[#f0e8e0] mb-1">
+                  أصلي ١٠٠٪ مضمون
+                </h4>
+                <p className="text-sm text-[#9a8880] leading-relaxed">
+                  كل زوج يتحقق منه قبل ما يخرج من عندنا.
+                </p>
               </div>
             </div>
           </div>
         </section>
-
       </div>
     </Layout>
   );

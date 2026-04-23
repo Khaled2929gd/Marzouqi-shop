@@ -6,20 +6,53 @@ import {
   useGetProduct,
   useUpdateProduct,
   useListCategories,
+  useCreateCategory,
+  type Category,
 } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { Loader2, ArrowLeft, Upload, Sparkles, ImageIcon } from "lucide-react";
+import {
+  Loader2,
+  ArrowLeft,
+  Upload,
+  Sparkles,
+  ImageIcon,
+  Check,
+  ChevronsUpDown,
+  Plus,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const productSchema = z.object({
   name: z.string().min(2, "Nom requis"),
@@ -31,8 +64,149 @@ const productSchema = z.object({
   category: z.string().optional().default(""),
   sizes: z.string().min(1, "Pointures requises"),
   stock: z.coerce.number().min(0, "Stock ne peut pas être négatif"),
-  featured: z.boolean().default(false)
+  featured: z.boolean().default(false),
 });
+
+// ── Category combobox: select existing or create a new one inline ──
+function CategoryCombobox({
+  value,
+  onChange,
+  categories,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  categories: Category[] | undefined;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const createCat = useCreateCategory();
+
+  const selected = categories?.find((c) => c.slug === value);
+
+  const filtered = query.trim()
+    ? (categories ?? []).filter(
+        (c) =>
+          c.name.toLowerCase().includes(query.toLowerCase()) ||
+          c.slug.toLowerCase().includes(query.toLowerCase()),
+      )
+    : (categories ?? []);
+
+  const exactMatch = (categories ?? []).some(
+    (c) =>
+      c.name.toLowerCase() === query.trim().toLowerCase() ||
+      c.slug.toLowerCase() === query.trim().toLowerCase(),
+  );
+
+  const handleCreate = () => {
+    if (!query.trim()) return;
+    createCat.mutate(
+      { name: query.trim() },
+      {
+        onSuccess: (cat) => {
+          queryClient.invalidateQueries({ queryKey: ["categories"] });
+          onChange(cat.slug);
+          setQuery("");
+          setOpen(false);
+          toast({ title: `Catégorie "${cat.name}" créée avec succès` });
+        },
+        onError: (err) => {
+          toast({ title: `Erreur : ${err.message}`, variant: "destructive" });
+        },
+      },
+    );
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal"
+        >
+          <span className={cn(!selected && "text-muted-foreground")}>
+            {selected ? selected.name : "Sélectionner ou créer…"}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-[--radix-popover-trigger-width] p-0"
+        align="start"
+      >
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Rechercher ou taper un nouveau nom…"
+            value={query}
+            onValueChange={setQuery}
+          />
+          <CommandList>
+            {(categories ?? []).length === 0 && !query.trim() && (
+              <CommandEmpty>
+                Aucune catégorie. Tapez un nom pour en créer une.
+              </CommandEmpty>
+            )}
+            {filtered.length > 0 && (
+              <CommandGroup heading="Catégories existantes">
+                {filtered.map((cat) => (
+                  <CommandItem
+                    key={cat.id}
+                    value={cat.slug}
+                    onSelect={() => {
+                      onChange(cat.slug === value ? "" : cat.slug);
+                      setQuery("");
+                      setOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4 shrink-0",
+                        value === cat.slug ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                    <span className="flex-1">{cat.name}</span>
+                    <span className="ml-2 text-xs text-muted-foreground opacity-60">
+                      {cat.slug}
+                    </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+            {filtered.length === 0 && query.trim() && !exactMatch && (
+              <CommandEmpty>Aucun résultat pour "{query}".</CommandEmpty>
+            )}
+            {query.trim() && !exactMatch && (
+              <>
+                <CommandSeparator />
+                <CommandGroup>
+                  <CommandItem
+                    value={`__new__${query}`}
+                    onSelect={handleCreate}
+                    disabled={createCat.isPending}
+                    className="text-red-600 data-[selected=true]:bg-red-50 data-[selected=true]:text-red-700"
+                  >
+                    {createCat.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Plus className="mr-2 h-4 w-4 shrink-0" />
+                    )}
+                    {createCat.isPending
+                      ? "Création en cours…"
+                      : `Créer la catégorie "${query}"`}
+                  </CommandItem>
+                </CommandGroup>
+              </>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export default function AdminProductForm() {
   const [match, params] = useRoute("/admin/products/:id/edit");
@@ -69,14 +243,17 @@ export default function AdminProductForm() {
       category: "",
       sizes: "",
       stock: 0,
-      featured: false
-    }
+      featured: false,
+    },
   });
 
   // Update preview when imageUrl field changes manually
   const watchedImageUrl = form.watch("imageUrl");
   useEffect(() => {
-    if (watchedImageUrl && (watchedImageUrl.startsWith("http") || watchedImageUrl.startsWith("/"))) {
+    if (
+      watchedImageUrl &&
+      (watchedImageUrl.startsWith("http") || watchedImageUrl.startsWith("/"))
+    ) {
       setPreviewUrl(watchedImageUrl);
     }
   }, [watchedImageUrl]);
@@ -93,7 +270,7 @@ export default function AdminProductForm() {
         category: product.category,
         sizes: product.sizes.join(", "),
         stock: product.stock,
-        featured: product.featured
+        featured: product.featured,
       });
       if (product.imageUrl) setPreviewUrl(product.imageUrl);
     }
@@ -102,7 +279,10 @@ export default function AdminProductForm() {
   const handleAutoFill = async () => {
     const name = form.getValues("name").trim();
     if (name.length < 2) {
-      toast({ title: "Entrez d'abord le nom du produit", variant: "destructive" });
+      toast({
+        title: "Entrez d'abord le nom du produit",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -138,15 +318,36 @@ export default function AdminProductForm() {
         data = JSON.parse(jsonMatch[0]);
       }
 
-      if (data.brand) form.setValue("brand", String(data.brand), { shouldDirty: true, shouldValidate: true });
-      if (data.description) form.setValue("description", String(data.description), { shouldDirty: true, shouldValidate: true });
-      if (data.price && !form.getValues("price")) form.setValue("price", Number(data.price), { shouldDirty: true });
-      if (data.category) form.setValue("category", String(data.category), { shouldDirty: true, shouldValidate: true });
-      if (data.sizes) form.setValue("sizes", String(data.sizes), { shouldDirty: true });
+      if (data.brand)
+        form.setValue("brand", String(data.brand), {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+      if (data.description)
+        form.setValue("description", String(data.description), {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+      if (data.price && !form.getValues("price"))
+        form.setValue("price", Number(data.price), { shouldDirty: true });
+      if (data.category)
+        form.setValue("category", String(data.category), {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+      if (data.sizes)
+        form.setValue("sizes", String(data.sizes), { shouldDirty: true });
 
-      toast({ title: "Infos remplies automatiquement !", description: "Vérifiez et ajustez si nécessaire." });
+      toast({
+        title: "Infos remplies automatiquement !",
+        description: "Vérifiez et ajustez si nécessaire.",
+      });
     } catch {
-      toast({ title: "Échec de l'auto-remplissage", description: "Réessayez dans un moment.", variant: "destructive" });
+      toast({
+        title: "Échec de l'auto-remplissage",
+        description: "Réessayez dans un moment.",
+        variant: "destructive",
+      });
     } finally {
       setIsAutoFilling(false);
     }
@@ -163,13 +364,23 @@ export default function AdminProductForm() {
     setIsUploadingImage(true);
     try {
       const uploadedUrl = await uploadProductImage(file);
-      form.setValue("imageUrl", uploadedUrl, { shouldDirty: true, shouldValidate: true });
+      form.setValue("imageUrl", uploadedUrl, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
       setPreviewUrl(uploadedUrl);
-      toast({ title: "Image uploadée", description: "URL remplie depuis Supabase Storage." });
+      toast({
+        title: "Image uploadée",
+        description: "URL remplie depuis Supabase Storage.",
+      });
     } catch (error) {
       setPreviewUrl(null);
       const message = error instanceof Error ? error.message : "Upload failed";
-      toast({ title: "Échec de l'upload", description: message, variant: "destructive" });
+      toast({
+        title: "Échec de l'upload",
+        description: message,
+        variant: "destructive",
+      });
     } finally {
       setIsUploadingImage(false);
       event.target.value = "";
@@ -192,8 +403,9 @@ export default function AdminProductForm() {
             toast({ title: "Produit mis à jour" });
             setLocation("/admin/products");
           },
-          onError: () => toast({ title: "Échec de la mise à jour", variant: "destructive" })
-        }
+          onError: () =>
+            toast({ title: "Échec de la mise à jour", variant: "destructive" }),
+        },
       );
     } else {
       createProduct.mutate(
@@ -203,8 +415,9 @@ export default function AdminProductForm() {
             toast({ title: "Produit créé avec succès" });
             setLocation("/admin/products");
           },
-          onError: () => toast({ title: "Échec de la création", variant: "destructive" })
-        }
+          onError: () =>
+            toast({ title: "Échec de la création", variant: "destructive" }),
+        },
       );
     }
   };
@@ -222,10 +435,8 @@ export default function AdminProductForm() {
   return (
     <Layout title={isEdit ? "Modifier Produit" : "Nouveau Produit"}>
       <div className="px-4 md:px-8 py-8 w-full max-w-2xl mx-auto">
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-
             {/* Name + Auto-fill */}
             <FormField
               control={form.control}
@@ -235,7 +446,11 @@ export default function AdminProductForm() {
                   <FormLabel>Nom du produit</FormLabel>
                   <div className="flex gap-2">
                     <FormControl>
-                      <Input placeholder="Air Jordan 1 High" className="flex-1" {...field} />
+                      <Input
+                        placeholder="Air Jordan 1 High"
+                        className="flex-1"
+                        {...field}
+                      />
                     </FormControl>
                     <Button
                       type="button"
@@ -244,8 +459,14 @@ export default function AdminProductForm() {
                       onClick={handleAutoFill}
                       disabled={isAutoFilling}
                     >
-                      {isAutoFilling ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                      <span className="hidden sm:inline text-sm">Auto-fill</span>
+                      {isAutoFilling ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-4 h-4" />
+                      )}
+                      <span className="hidden sm:inline text-sm">
+                        Auto-fill
+                      </span>
                     </Button>
                   </div>
                   <FormMessage />
@@ -261,7 +482,9 @@ export default function AdminProductForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Marque</FormLabel>
-                    <FormControl><Input placeholder="Nike" {...field} /></FormControl>
+                    <FormControl>
+                      <Input placeholder="Nike" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -271,17 +494,15 @@ export default function AdminProductForm() {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-500">Catégorie <span className="text-xs font-normal">(optionnel)</span></FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories?.map(cat => (
-                          <SelectItem key={cat.id} value={cat.slug}>{cat.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel className="text-gray-500">
+                      Catégorie{" "}
+                      <span className="text-xs font-normal">(optionnel)</span>
+                    </FormLabel>
+                    <CategoryCombobox
+                      value={field.value}
+                      onChange={field.onChange}
+                      categories={categories}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -296,7 +517,9 @@ export default function AdminProductForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Prix ($)</FormLabel>
-                    <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                    <FormControl>
+                      <Input type="number" step="0.01" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -306,13 +529,22 @@ export default function AdminProductForm() {
                 name="originalPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-500">Barré ($) <span className="text-xs font-normal">(opt.)</span></FormLabel>
+                    <FormLabel className="text-gray-500">
+                      Barré ($){" "}
+                      <span className="text-xs font-normal">(opt.)</span>
+                    </FormLabel>
                     <FormControl>
                       <Input
-                        type="number" step="0.01" placeholder="—"
+                        type="number"
+                        step="0.01"
+                        placeholder="—"
                         {...field}
                         value={field.value ?? ""}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? Number(e.target.value) : null,
+                          )
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -325,7 +557,9 @@ export default function AdminProductForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Stock</FormLabel>
-                    <FormControl><Input type="number" {...field} /></FormControl>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -356,18 +590,44 @@ export default function AdminProductForm() {
                   <FormLabel>Image</FormLabel>
                   <div className="flex gap-3">
                     <div className="shrink-0 w-20 h-20 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden">
-                      {previewUrl
-                        ? <img src={previewUrl} alt="Aperçu" className="w-full h-full object-contain p-1" onError={() => setPreviewUrl(null)} />
-                        : <ImageIcon className="w-6 h-6 text-gray-300" />
-                      }
+                      {previewUrl ? (
+                        <img
+                          src={previewUrl}
+                          alt="Aperçu"
+                          className="w-full h-full object-contain p-1"
+                          onError={() => setPreviewUrl(null)}
+                        />
+                      ) : (
+                        <ImageIcon className="w-6 h-6 text-gray-300" />
+                      )}
                     </div>
                     <div className="flex-1 space-y-2">
                       <FormControl>
-                        <Input placeholder="https://… ou /images/shoe.png" {...field} />
+                        <Input
+                          placeholder="https://… ou /images/shoe.png"
+                          {...field}
+                        />
                       </FormControl>
-                      <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleImageUpload} />
-                      <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={() => imageInputRef.current?.click()} disabled={isUploadingImage}>
-                        {isUploadingImage ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-1.5" />}
+                      <input
+                        ref={imageInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        onChange={handleImageUpload}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full"
+                        onClick={() => imageInputRef.current?.click()}
+                        disabled={isUploadingImage}
+                      >
+                        {isUploadingImage ? (
+                          <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                        ) : (
+                          <Upload className="w-3.5 h-3.5 mr-1.5" />
+                        )}
                         {isUploadingImage ? "Upload…" : "Uploader"}
                       </Button>
                     </div>
@@ -383,9 +643,16 @@ export default function AdminProductForm() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-500">Description <span className="text-xs font-normal">(optionnel)</span></FormLabel>
+                  <FormLabel className="text-gray-500">
+                    Description{" "}
+                    <span className="text-xs font-normal">(optionnel)</span>
+                  </FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Description du produit…" className="resize-none h-20" {...field} />
+                    <Textarea
+                      placeholder="Description du produit…"
+                      className="resize-none h-20"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -399,24 +666,37 @@ export default function AdminProductForm() {
               render={({ field }) => (
                 <FormItem className="flex items-center gap-3 space-y-0">
                   <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                   </FormControl>
-                  <FormLabel className="font-normal cursor-pointer">Produit en vedette (page d'accueil)</FormLabel>
+                  <FormLabel className="font-normal cursor-pointer">
+                    Produit en vedette (page d'accueil)
+                  </FormLabel>
                 </FormItem>
               )}
             />
 
             {/* Actions */}
             <div className="flex justify-end gap-3 pt-2">
-              <Button type="button" variant="outline" onClick={() => setLocation("/admin/products")} className="rounded-full">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setLocation("/admin/products")}
+                className="rounded-full"
+              >
                 Annuler
               </Button>
-              <Button type="submit" disabled={isPending} className="rounded-full">
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="rounded-full"
+              >
                 {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {isEdit ? "Enregistrer" : "Créer"}
               </Button>
             </div>
-
           </form>
         </Form>
       </div>

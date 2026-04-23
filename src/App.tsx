@@ -22,8 +22,8 @@ const NotFound = lazy(() => import("./pages/not-found"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5,   // data stays fresh for 5 min — no refetch on nav back
-      gcTime: 1000 * 60 * 10,     // keep unused cache for 10 min
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 10,
       retry: 1,
       refetchOnWindowFocus: false,
     },
@@ -31,94 +31,88 @@ const queryClient = new QueryClient({
 });
 
 const RouteFallback = () => (
-  <div className="flex min-h-dvh items-center justify-center bg-white" role="status" aria-live="polite">
-    <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-gray-900" />
+  <div
+    className="flex min-h-dvh items-center justify-center bg-[#0d0b09]"
+    role="status"
+    aria-live="polite"
+  >
+    <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#2a2520] border-t-[#ff616d]" />
     <span className="sr-only">جاري التحميل...</span>
   </div>
 );
 
+// Route wrappers defined OUTSIDE Router — prevents React from treating them as
+// new component types on every render (which causes full unmount/remount = stuck loading bug).
+const HomeRoute = () => (
+  <Suspense fallback={<RouteFallback />}>
+    <Home />
+  </Suspense>
+);
+const ProductsRoute = () => (
+  <Suspense fallback={<RouteFallback />}>
+    <Products />
+  </Suspense>
+);
+const ProductDetailRoute = () => (
+  <Suspense fallback={<RouteFallback />}>
+    <ProductDetail />
+  </Suspense>
+);
+const CartRoute = () => (
+  <Suspense fallback={<RouteFallback />}>
+    <Cart />
+  </Suspense>
+);
+const CheckoutRoute = () => (
+  <Suspense fallback={<RouteFallback />}>
+    <Checkout />
+  </Suspense>
+);
+const OrderConfirmationRoute = () => (
+  <Suspense fallback={<RouteFallback />}>
+    <OrderConfirmation />
+  </Suspense>
+);
+const AdminLoginRoute = () => (
+  <Suspense fallback={<RouteFallback />}>
+    <AdminLogin />
+  </Suspense>
+);
+const AdminDashboardRoute = () => (
+  <AdminRoute>
+    <Suspense fallback={<RouteFallback />}>
+      <AdminDashboard />
+    </Suspense>
+  </AdminRoute>
+);
+const AdminProductsRoute = () => (
+  <AdminRoute>
+    <Suspense fallback={<RouteFallback />}>
+      <AdminProducts />
+    </Suspense>
+  </AdminRoute>
+);
+const AdminProductFormRoute = () => (
+  <AdminRoute>
+    <Suspense fallback={<RouteFallback />}>
+      <AdminProductForm />
+    </Suspense>
+  </AdminRoute>
+);
+const AdminOrdersRoute = () => (
+  <AdminRoute>
+    <Suspense fallback={<RouteFallback />}>
+      <AdminOrders />
+    </Suspense>
+  </AdminRoute>
+);
+const NotFoundRoute = () => (
+  <Suspense fallback={<RouteFallback />}>
+    <NotFound />
+  </Suspense>
+);
+
 function Router() {
-
-  const HomeRoute = () => (
-    <Suspense fallback={<RouteFallback />}>
-      <Home />
-    </Suspense>
-  );
-
-  const ProductsRoute = () => (
-    <Suspense fallback={<RouteFallback />}>
-      <Products />
-    </Suspense>
-  );
-
-  const ProductDetailRoute = () => (
-    <Suspense fallback={<RouteFallback />}>
-      <ProductDetail />
-    </Suspense>
-  );
-
-  const CartRoute = () => (
-    <Suspense fallback={<RouteFallback />}>
-      <Cart />
-    </Suspense>
-  );
-
-  const CheckoutRoute = () => (
-    <Suspense fallback={<RouteFallback />}>
-      <Checkout />
-    </Suspense>
-  );
-
-  const OrderConfirmationRoute = () => (
-    <Suspense fallback={<RouteFallback />}>
-      <OrderConfirmation />
-    </Suspense>
-  );
-
-  const AdminLoginRoute = () => (
-    <Suspense fallback={<RouteFallback />}>
-      <AdminLogin />
-    </Suspense>
-  );
-
-  const AdminDashboardRoute = () => (
-    <AdminRoute>
-      <Suspense fallback={<RouteFallback />}>
-        <AdminDashboard />
-      </Suspense>
-    </AdminRoute>
-  );
-
-  const AdminProductsRoute = () => (
-    <AdminRoute>
-      <Suspense fallback={<RouteFallback />}>
-        <AdminProducts />
-      </Suspense>
-    </AdminRoute>
-  );
-
-  const AdminProductFormRoute = () => (
-    <AdminRoute>
-      <Suspense fallback={<RouteFallback />}>
-        <AdminProductForm />
-      </Suspense>
-    </AdminRoute>
-  );
-
-  const AdminOrdersRoute = () => (
-    <AdminRoute>
-      <Suspense fallback={<RouteFallback />}>
-        <AdminOrders />
-      </Suspense>
-    </AdminRoute>
-  );
-
-  const NotFoundRoute = () => (
-    <Suspense fallback={<RouteFallback />}>
-      <NotFound />
-    </Suspense>
-  );
-
   return (
     <Switch>
       <Route path="/" component={HomeRoute} />
@@ -126,16 +120,19 @@ function Router() {
       <Route path="/products/:id" component={ProductDetailRoute} />
       <Route path="/cart" component={CartRoute} />
       <Route path="/checkout" component={CheckoutRoute} />
-      <Route path="/order-confirmation/:id" component={OrderConfirmationRoute} />
-      
-      {/* Admin routes */}
+      <Route
+        path="/order-confirmation/:id"
+        component={OrderConfirmationRoute}
+      />
       <Route path="/admin/login" component={AdminLoginRoute} />
       <Route path="/admin" component={AdminDashboardRoute} />
       <Route path="/admin/products" component={AdminProductsRoute} />
       <Route path="/admin/products/new" component={AdminProductFormRoute} />
-      <Route path="/admin/products/:id/edit" component={AdminProductFormRoute} />
+      <Route
+        path="/admin/products/:id/edit"
+        component={AdminProductFormRoute}
+      />
       <Route path="/admin/orders" component={AdminOrdersRoute} />
-
       <Route component={NotFoundRoute} />
     </Switch>
   );

@@ -1,10 +1,19 @@
 import { useState, useEffect } from "react";
 import { Layout } from "../components/layout";
 import { ProductCard } from "../components/product-card";
-import { useListProducts, useListCategories } from "@workspace/api-client-react";
+import {
+  useListProducts,
+  useListCategories,
+} from "@workspace/api-client-react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -23,7 +32,6 @@ function getCategoryLabel(name: string): string {
 export default function Products() {
   const searchParams = new URLSearchParams(window.location.search);
   const initialCategory = searchParams.get("category") || "";
-
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [category, setCategory] = useState(initialCategory);
@@ -37,7 +45,6 @@ export default function Products() {
     search: debouncedSearch || undefined,
     category: category || undefined,
   });
-
   const { data: categories } = useListCategories();
 
   const handleClearFilters = () => {
@@ -49,35 +56,44 @@ export default function Products() {
   return (
     <Layout title="المتجر">
       <div className="flex flex-col md:flex-row gap-8 px-4 md:px-8 py-8 w-full">
-
-        {/* Mobile Search & Filter Bar */}
+        {/* Mobile search + filter */}
         <div className="flex md:hidden gap-2">
           <div className="relative flex-1">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6a5c56]" />
             <Input
               placeholder="ابحث عن سنيكرز..."
-              className="ps-9 bg-gray-50 border-transparent rounded-full"
+              className="ps-9 bg-[#1c1916] border-transparent rounded-full text-[#f0e8e0] placeholder:text-[#6a5c56]"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="shrink-0 rounded-full border-gray-200" aria-label="فتح الفلاتر">
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0 rounded-full border-[#2a2520] bg-[#1c1916] text-[#f0e8e0] hover:bg-[#242018]"
+                aria-label="فتح الفلاتر"
+              >
                 <SlidersHorizontal className="w-4 h-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
+            <SheetContent
+              side="right"
+              className="bg-[#0d0b09] border-[#2a2520]"
+            >
               <SheetHeader className="mb-6">
-                <SheetTitle>الفلاتر</SheetTitle>
+                <SheetTitle className="text-[#f0e8e0]">الفلاتر</SheetTitle>
               </SheetHeader>
               <div className="space-y-6">
                 <div>
-                  <h4 className="font-semibold text-sm text-gray-900 mb-3">الأقسام</h4>
+                  <h4 className="font-semibold text-sm text-[#f0e8e0] mb-3">
+                    الأقسام
+                  </h4>
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setCategory("")}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${category === "" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${category === "" ? "bg-[#ff616d] text-white" : "bg-[#1c1916] text-[#c4b5ac] hover:bg-[#242018] hover:text-[#ff616d]"}`}
                     >
                       الكل
                     </button>
@@ -85,7 +101,7 @@ export default function Products() {
                       <button
                         key={cat.id}
                         onClick={() => setCategory(cat.slug)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${category === cat.slug ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${category === cat.slug ? "bg-[#ff616d] text-white" : "bg-[#1c1916] text-[#c4b5ac] hover:bg-[#242018] hover:text-[#ff616d]"}`}
                       >
                         {getCategoryLabel(cat.name)}
                       </button>
@@ -97,35 +113,45 @@ export default function Products() {
           </Sheet>
         </div>
 
-        {/* Desktop Sidebar */}
+        {/* Desktop sidebar */}
         <aside className="hidden md:block w-48 shrink-0">
-          <div className="sticky top-24 space-y-8">
+          <div className="sticky top-20 space-y-8">
             <div className="relative">
-              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6a5c56]" />
               <Input
                 placeholder="ابحث..."
-                className="ps-9 bg-gray-50 border-transparent rounded-full"
+                className="ps-9 bg-[#1c1916] border-transparent rounded-full text-[#f0e8e0] placeholder:text-[#6a5c56]"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
               {search && (
-                <button onClick={() => setSearch("")} className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" aria-label="مسح البحث">
+                <button
+                  onClick={() => setSearch("")}
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-[#6a5c56] hover:text-[#ff616d]"
+                  aria-label="مسح البحث"
+                >
                   <X className="w-4 h-4" />
                 </button>
               )}
             </div>
-
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">الأقسام</h3>
+                <h3 className="text-xs font-bold text-[#6a5c56] uppercase tracking-widest">
+                  الأقسام
+                </h3>
                 {category && (
-                  <button onClick={() => setCategory("")} className="text-xs text-gray-400 hover:text-gray-900">مسح</button>
+                  <button
+                    onClick={() => setCategory("")}
+                    className="text-xs text-[#6a5c56] hover:text-[#ff616d]"
+                  >
+                    مسح
+                  </button>
                 )}
               </div>
               <div className="space-y-1">
                 <button
                   onClick={() => setCategory("")}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${category === "" ? "font-semibold text-gray-900 bg-gray-50" : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"}`}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${category === "" ? "font-semibold text-[#f0e8e0] bg-[#242018]" : "text-[#9a8880] hover:text-[#f0e8e0] hover:bg-[#1c1916]"}`}
                 >
                   <span>جميع المنتجات</span>
                 </button>
@@ -133,10 +159,12 @@ export default function Products() {
                   <button
                     key={cat.id}
                     onClick={() => setCategory(cat.slug)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${category === cat.slug ? "font-semibold text-gray-900 bg-gray-50" : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"}`}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${category === cat.slug ? "font-semibold text-[#f0e8e0] bg-[#242018]" : "text-[#9a8880] hover:text-[#f0e8e0] hover:bg-[#1c1916]"}`}
                   >
                     <span>{getCategoryLabel(cat.name)}</span>
-                    <span className="text-xs text-gray-400">{cat.productCount}</span>
+                    <span className="text-xs text-[#6a5c56]">
+                      {cat.productCount}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -144,19 +172,22 @@ export default function Products() {
           </div>
         </aside>
 
-        {/* Product Grid */}
+        {/* Product grid */}
         <div className="flex-1">
           <div className="hidden items-center justify-between mb-8 md:flex">
-            <h2 className="text-xl font-black text-gray-900">
-              {category ? getCategoryLabel(categories?.find(c => c.slug === category)?.name || "") : "جميع المنتجات"}
-              <span className="text-gray-300 text-base font-normal ms-2">
+            <h2 className="text-xl font-black text-[#f0e8e0]">
+              {category
+                ? getCategoryLabel(
+                    categories?.find((c) => c.slug === category)?.name || "",
+                  )
+                : "جميع المنتجات"}
+              <span className="text-[#6a5c56] text-base font-normal ms-2">
                 ({products?.length || 0})
               </span>
             </h2>
           </div>
-
           {isLoading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="flex flex-col gap-2">
                   <Skeleton className="aspect-square w-full rounded-xl" />
@@ -167,19 +198,27 @@ export default function Products() {
               ))}
             </div>
           ) : products && products.length > 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {products.map((product, i) => (
                 <ProductCard key={product.id} product={product} index={i} />
               ))}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                <Search className="w-6 h-6 text-gray-400" />
+              <div className="w-14 h-14 bg-[#1c1916] rounded-full flex items-center justify-center mb-4">
+                <Search className="w-6 h-6 text-[#ff616d]" />
               </div>
-              <h3 className="text-base font-bold text-gray-900 mb-2">ما لقيناش منتجات</h3>
-              <p className="text-sm text-gray-500 max-w-sm mb-6">ما كاين حتى منتج يتناسب مع هذه الفلاتر.</p>
-              <Button onClick={handleClearFilters} variant="outline" className="rounded-full">
+              <h3 className="text-base font-bold text-[#f0e8e0] mb-2">
+                ما لقيناش منتجات
+              </h3>
+              <p className="text-sm text-[#9a8880] max-w-sm mb-6">
+                ما كاين حتى منتج يتناسب مع هذه الفلاتر.
+              </p>
+              <Button
+                onClick={handleClearFilters}
+                variant="outline"
+                className="rounded-full border-[#2a2520] text-[#f0e8e0] hover:bg-[#1c1916]"
+              >
                 مسح الفلاتر
               </Button>
             </div>

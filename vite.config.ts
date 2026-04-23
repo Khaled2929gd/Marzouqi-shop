@@ -9,33 +9,46 @@ export default defineConfig({
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
-      "@workspace/api-client-react": path.resolve(import.meta.dirname, "src/api-client-react/index.ts"),
+      "@workspace/api-client-react": path.resolve(
+        import.meta.dirname,
+        "src/api-client-react/index.ts",
+      ),
     },
     dedupe: ["react", "react-dom"],
   },
   root: path.resolve(import.meta.dirname),
+  esbuild: {
+    drop: ["console", "debugger"],
+    legalComments: "none",
+  },
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    target: "esnext",
+    cssMinify: true,
+    minify: "esbuild",
+    reportCompressedSize: false,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Recharts only used in admin — isolate it so storefront users never download it
-          if (id.includes("recharts") || id.includes("victory-vendor")) {
+          if (id.includes("recharts") || id.includes("victory-vendor"))
             return "recharts";
-          }
-          // Keep React core in its own chunk — cached across deployments
-          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) {
+          if (
+            id.includes("node_modules/react/") ||
+            id.includes("node_modules/react-dom/") ||
+            id.includes("node_modules/scheduler/")
+          )
             return "react-core";
-          }
-          // Radix UI primitives in one vendor chunk
-          if (id.includes("@radix-ui")) {
-            return "radix-ui";
-          }
-          // Framer Motion separate — only loads on pages that animate
-          if (id.includes("framer-motion")) {
-            return "framer-motion";
-          }
+          if (id.includes("@radix-ui")) return "radix-ui";
+          if (id.includes("framer-motion")) return "framer-motion";
+          if (id.includes("@supabase")) return "supabase";
+          if (id.includes("@tanstack")) return "tanstack-query";
+          if (
+            id.includes("react-hook-form") ||
+            id.includes("@hookform") ||
+            id.includes("zod")
+          )
+            return "forms";
         },
       },
     },
