@@ -55,16 +55,11 @@ export default function Home() {
             className="absolute inset-0 w-full h-full object-cover object-center"
           />
 
-          {/* Strong dark overlay — 80% so text is always readable */}
-          <div className="absolute inset-0 bg-black/80" />
+          {/* Dark overlay — adjusted for better visibility */}
+          <div className="absolute inset-0 bg-black/50" />
 
           {/* ── Content stack ── */}
           <div className="relative z-10 flex flex-col items-center gap-4 px-4 pt-8 pb-7 max-w-lg mx-auto text-center">
-            {/* 1 ▸ TOP BADGE */}
-            <span className="-rotate-2 inline-block bg-[#ff616d] text-white text-sm font-black px-5 py-1.5 rounded-full shadow-lg tracking-wide">
-              🔥 جديد
-            </span>
-
             {/* 2 ▸ MAIN HEADLINE */}
             <div>
               <h1 className="text-5xl md:text-6xl font-black text-white leading-tight drop-shadow-lg">
@@ -77,8 +72,7 @@ export default function Home() {
 
             {/* 3 ▸ SUBTEXT */}
             <p className="text-white/90 text-lg md:text-xl font-bold leading-snug">
-              توصيل حتى لباب دارك فـ
-              <span className="text-[#ff616d]">ڭلميم</span>
+              متوفر التوصيل
             </p>
 
             {/* 4 ▸ TRUST ROW */}
@@ -112,10 +106,10 @@ export default function Home() {
             {/* 5 ▸ PRICE BADGE */}
             <div className="bg-[#2a1210] border-2 border-[#ff616d] rounded-2xl px-8 py-3 shadow-xl shadow-red-900/30 text-center">
               <p className="text-[#9a8880] text-sm font-bold leading-none mb-1">
-                ابتداءً من
+                كلشي
               </p>
               <p className="text-[#ff616d] font-black leading-none">
-                <span className="text-5xl">49</span>
+                <span className="text-5xl">100</span>
                 <span className="text-2xl mr-1">درهم</span>
               </p>
             </div>
@@ -154,7 +148,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-white/90 text-sm font-bold leading-snug">
-                أكثر من 10,000 زبونة راضية&nbsp;⭐⭐⭐⭐⭐
+                أكثر من 1000 زبونة راضية&nbsp;⭐⭐⭐⭐⭐
               </p>
             </div>
           </div>
