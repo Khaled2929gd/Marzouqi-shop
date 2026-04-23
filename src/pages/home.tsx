@@ -5,14 +5,9 @@ import {
 import { Layout } from "../components/layout";
 import { ProductCard } from "../components/product-card";
 import { Link } from "wouter";
-import {
-  ArrowLeft,
-  ShieldCheck,
-  Truck,
-  Banknote,
-  MessageCircle,
-} from "lucide-react";
+import { ShieldCheck, Truck, Banknote } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FaWhatsapp } from "react-icons/fa";
 
 function getCategoryLabel(name: string): string {
   const labels: Record<string, string> = {
@@ -26,6 +21,11 @@ function getCategoryLabel(name: string): string {
   return labels[name.toLowerCase()] || name;
 }
 
+const WA_NUMBER = (import.meta.env.VITE_WHATSAPP_ORDER_PHONE || "").replace(
+  /\s/g,
+  "",
+);
+
 export default function Home() {
   const { data: featuredProducts, isLoading: isLoadingFeatured } =
     useGetFeaturedProducts();
@@ -34,9 +34,15 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="flex-1 w-full justify-center">
-        {/* Hero */}
-        <section className="relative px-4 md:px-8 py-16 md:py-28 border-b border-[#1e1a16] overflow-hidden min-h-[420px] flex items-center">
+      <div className="flex-1 w-full">
+        {/* ═══════════════════════════════════════════════
+            HERO — conversion-focused, mobile-first, Darija
+        ═══════════════════════════════════════════════ */}
+        <section
+          className="relative overflow-hidden border-b border-[#1e1a16]"
+          dir="rtl"
+        >
+          {/* Background image */}
           <img
             src="/heroo.png"
             alt=""
@@ -48,46 +54,112 @@ export default function Home() {
             height={900}
             className="absolute inset-0 w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-black/50" />
-          <div className="relative z-10 max-w-xl">
-            <h1 className="text-3xl md:text-5xl font-black text-white leading-[1.12] mb-4 drop-shadow-lg">
-              أفضل أنواع الأحذية فكلميم وبأثمنة متلقاش بحالها
-            </h1>
-            <p className="text-white/80 text-sm mb-3 leading-relaxed">
-              ضرب دويرة فالمتجر وشوف ليك شي حاجة
-            </p>
-            <div className="flex flex-wrap gap-3 mb-8 text-xs text-white/70">
-              <span className="flex items-center gap-1.5">
-                <span className="text-[#ff8b95]">✓</span> الدفع عند الاستلام
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="text-[#ff8b95]">✓</span> توصيل لكلميم والجهة
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="text-[#ff8b95]">✓</span> أصلي 100%
-              </span>
+
+          {/* Strong dark overlay — 80% so text is always readable */}
+          <div className="absolute inset-0 bg-black/80" />
+
+          {/* ── Content stack ── */}
+          <div className="relative z-10 flex flex-col items-center gap-4 px-4 pt-8 pb-7 max-w-lg mx-auto text-center">
+            {/* 1 ▸ TOP BADGE */}
+            <span className="-rotate-2 inline-block bg-red-600 text-white text-sm font-black px-5 py-1.5 rounded-full shadow-lg tracking-wide">
+              🔥 جديد
+            </span>
+
+            {/* 2 ▸ MAIN HEADLINE */}
+            <div>
+              <h1 className="text-5xl md:text-6xl font-black text-white leading-tight drop-shadow-lg">
+                نعال زوينين
+              </h1>
+              <div className="inline-block mt-2 bg-[#FACC15] text-black text-4xl md:text-5xl font-black px-4 py-1 rounded-xl leading-snug shadow-md">
+                بثمن رخيص
+              </div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-2 bg-[#ff616d] hover:bg-[#ff5563] active:scale-95 text-white font-bold px-6 py-3 rounded-full transition-all text-sm shadow-lg"
-              >
-                كوموندي دبا <ArrowLeft className="w-4 h-4 rtl-flip" />
-              </Link>
-              <a
-                href={`https://wa.me/${import.meta.env.VITE_WHATSAPP_ORDER_PHONE || ""}`.replace(
-                  /\s/g,
-                  "",
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 backdrop-blur-sm border border-white/20 text-white font-bold px-6 py-3 rounded-full transition-all text-sm"
-              >
-                <MessageCircle className="w-4 h-4" /> اطلب بواتساب
-              </a>
+
+            {/* 3 ▸ SUBTEXT */}
+            <p className="text-white/90 text-lg md:text-xl font-bold leading-snug">
+              توصيل حتى لباب دارك فـ
+              <span className="text-[#FACC15]">ڭلميم</span>
+            </p>
+
+            {/* 4 ▸ TRUST ROW */}
+            <div className="flex flex-wrap justify-center gap-2 w-full">
+              <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-xl px-3 py-2">
+                <span className="text-[#4ADE80] font-black text-base leading-none">
+                  ✔
+                </span>
+                <span className="text-white text-xs font-bold">
+                  الدفع عند الاستلام
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-xl px-3 py-2">
+                <span className="text-[#4ADE80] font-black text-base leading-none">
+                  ✔
+                </span>
+                <span className="text-white text-xs font-bold">
+                  تبديل إلا ماعجبكش
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-xl px-3 py-2">
+                <span className="text-[#4ADE80] font-black text-base leading-none">
+                  ✔
+                </span>
+                <span className="text-white text-xs font-bold">
+                  توصيل فـڭلميم فقط
+                </span>
+              </div>
+            </div>
+
+            {/* 5 ▸ PRICE BADGE */}
+            <div className="bg-[#FACC15] rounded-2xl px-8 py-3 shadow-xl shadow-yellow-900/30 text-center">
+              <p className="text-black/60 text-sm font-bold leading-none mb-1">
+                ابتداءً من
+              </p>
+              <p className="text-black font-black leading-none">
+                <span className="text-5xl">49</span>
+                <span className="text-2xl mr-1">درهم</span>
+              </p>
+            </div>
+
+            {/* 6 ▸ PRIMARY CTA — WhatsApp */}
+            <a
+              href={`https://wa.me/${WA_NUMBER}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-3 w-full bg-[#25D366] hover:bg-[#1db954] active:scale-95 text-white font-black text-xl px-6 py-4 rounded-2xl transition-all shadow-2xl shadow-green-900/50"
+            >
+              <FaWhatsapp className="text-2xl shrink-0" />
+              اطلب دابا فواتساب
+            </a>
+
+            {/* 7 ▸ SECONDARY CTA */}
+            <Link
+              href="/products"
+              className="flex items-center justify-center w-full border-2 border-white/40 hover:border-white/70 hover:bg-white/10 active:scale-95 text-white font-bold text-base px-6 py-3 rounded-2xl transition-all"
+            >
+              شوف الكولكسيون
+            </Link>
+
+            {/* 8 ▸ SOCIAL PROOF STRIP */}
+            <div className="flex items-center justify-center gap-3 pt-1">
+              {/* Mini avatar circles */}
+              <div className="flex" dir="ltr">
+                {["🧕", "👩", "👩‍🦱", "👩‍🦳"].map((emoji, i) => (
+                  <span
+                    key={i}
+                    style={{ marginLeft: i === 0 ? 0 : "-8px" }}
+                    className="w-8 h-8 rounded-full border-2 border-[#25D366] bg-[#1c1916] flex items-center justify-center text-sm shadow"
+                  >
+                    {emoji}
+                  </span>
+                ))}
+              </div>
+              <p className="text-white/90 text-sm font-bold leading-snug">
+                أكثر من 10,000 زبونة راضية&nbsp;⭐⭐⭐⭐⭐
+              </p>
             </div>
           </div>
         </section>
+        {/* ═══════════════════════ END HERO ═══════════════════════ */}
 
         {/* Category pills */}
         <section className="px-4 md:px-8 py-6 border-b border-[#1e1a16]">
@@ -131,6 +203,7 @@ export default function Home() {
               شوف الكل
             </Link>
           </div>
+
           {isLoadingFeatured ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -149,6 +222,7 @@ export default function Home() {
               ))}
             </div>
           )}
+
           <div className="mt-8 md:hidden">
             <Link
               href="/products"
