@@ -51,16 +51,20 @@ export function Layout({
             </button>
           ) : (
             <Link href="/" className="flex items-center leading-none group">
-              <div className="flex flex-col gap-0 items-stretch" dir="ltr">
-                <div className="flex items-baseline gap-2 whitespace-nowrap">
-                  <span className="font-black italic text-[#ff616d] text-xl md:text-2xl tracking-tight leading-none">
-                    Hmizat
-                  </span>
+              <div
+                className="flex items-baseline gap-2 whitespace-nowrap"
+                dir="ltr"
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              >
+                <span className="font-black  text-[#ff616d] text-2xl md:text-2xl tracking-tight leading-none">
+                  Hmizat
+                </span>
+                <div className="flex flex-col gap-0">
                   <span className="font-semibold text-white text-xl md:text-2xl tracking-wide leading-none">
                     Marzouki
                   </span>
+                  <div className="h-[2px] bg-[#ff616d] w-full mt-1 rounded-full" />
                 </div>
-                <div className="h-[2px] bg-[#ff616d] w-full mt-1 rounded-full" />
               </div>
             </Link>
           )}
