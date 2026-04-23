@@ -61,7 +61,7 @@ export default function Home() {
           {/* ── Content stack ── */}
           <div className="relative z-10 flex flex-col items-center gap-4 px-4 pt-8 pb-7 max-w-lg mx-auto text-center">
             {/* 1 ▸ TOP BADGE */}
-            <span className="-rotate-2 inline-block bg-red-600 text-white text-sm font-black px-5 py-1.5 rounded-full shadow-lg tracking-wide">
+            <span className="-rotate-2 inline-block bg-[#ff616d] text-white text-sm font-black px-5 py-1.5 rounded-full shadow-lg tracking-wide">
               🔥 جديد
             </span>
 
@@ -70,7 +70,7 @@ export default function Home() {
               <h1 className="text-5xl md:text-6xl font-black text-white leading-tight drop-shadow-lg">
                 نعال زوينين
               </h1>
-              <div className="inline-block mt-2 bg-[#FACC15] text-black text-4xl md:text-5xl font-black px-4 py-1 rounded-xl leading-snug shadow-md">
+              <div className="inline-block mt-2 bg-[#ff616d] text-white text-4xl md:text-5xl font-black px-4 py-1 rounded-xl leading-snug shadow-md">
                 بثمن رخيص
               </div>
             </div>
@@ -78,7 +78,7 @@ export default function Home() {
             {/* 3 ▸ SUBTEXT */}
             <p className="text-white/90 text-lg md:text-xl font-bold leading-snug">
               توصيل حتى لباب دارك فـ
-              <span className="text-[#FACC15]">ڭلميم</span>
+              <span className="text-[#ff616d]">ڭلميم</span>
             </p>
 
             {/* 4 ▸ TRUST ROW */}
@@ -110,11 +110,11 @@ export default function Home() {
             </div>
 
             {/* 5 ▸ PRICE BADGE */}
-            <div className="bg-[#FACC15] rounded-2xl px-8 py-3 shadow-xl shadow-yellow-900/30 text-center">
-              <p className="text-black/60 text-sm font-bold leading-none mb-1">
+            <div className="bg-[#2a1210] border-2 border-[#ff616d] rounded-2xl px-8 py-3 shadow-xl shadow-red-900/30 text-center">
+              <p className="text-[#9a8880] text-sm font-bold leading-none mb-1">
                 ابتداءً من
               </p>
-              <p className="text-black font-black leading-none">
+              <p className="text-[#ff616d] font-black leading-none">
                 <span className="text-5xl">49</span>
                 <span className="text-2xl mr-1">درهم</span>
               </p>
@@ -147,7 +147,7 @@ export default function Home() {
                   <span
                     key={i}
                     style={{ marginLeft: i === 0 ? 0 : "-8px" }}
-                    className="w-8 h-8 rounded-full border-2 border-[#25D366] bg-[#1c1916] flex items-center justify-center text-sm shadow"
+                    className="w-8 h-8 rounded-full border-2 border-[#ff616d] bg-[#0d0b09] flex items-center justify-center text-sm shadow"
                   >
                     {emoji}
                   </span>
