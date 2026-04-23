@@ -51,7 +51,7 @@ export function Layout({
             </button>
           ) : (
             <Link href="/" className="flex items-center leading-none group">
-              <div className="flex flex-col gap-0 items-stretch">
+              <div className="flex flex-col gap-0 items-stretch" dir="ltr">
                 <div className="flex items-baseline gap-2 whitespace-nowrap">
                   <span className="font-black italic text-[#ff616d] text-xl md:text-2xl tracking-tight leading-none">
                     Hmizat
