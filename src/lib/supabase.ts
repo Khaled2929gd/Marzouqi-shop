@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -17,17 +17,52 @@ export const SUPABASE_PRODUCT_IMAGES_BUCKET =
 const fallbackUrl = "https://example.supabase.co";
 const fallbackKey = "public-anon-placeholder-key";
 
-export const supabase = createClient(
-  isSupabaseConfigured ? String(supabaseUrl) : fallbackUrl,
-  isSupabaseConfigured ? String(supabaseAnonKey) : fallbackKey,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
-  },
-);
+// Singleton pattern to ensure only one Supabase client instance
+let supabaseInstance: SupabaseClient | null = null;
+
+function getSupabaseClient(): SupabaseClient {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(
+      isSupabaseConfigured ? String(supabaseUrl) : fallbackUrl,
+      isSupabaseConfigured ? String(supabaseAnonKey) : fallbackKey,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+          flowType: "pkce",
+          storage:
+            typeof window !== "undefined" ? window.localStorage : undefined,
+          storageKey: "sb-avehxalewhjqfqibgagr-auth-token",
+          debug: false,
+        },
+        global: {
+          headers: {
+            "X-Client-Info": "marzouqi-shop@1.0.0",
+          },
+        },
+      },
+    );
+
+    // Suppress lock warnings in development (caused by HMR)
+    if (import.meta.env.DEV) {
+      const originalError = console.error;
+      console.error = (...args: any[]) => {
+        if (
+          typeof args[0] === "string" &&
+          args[0].includes("Lock") &&
+          args[0].includes("was released")
+        ) {
+          return; // Suppress Supabase lock warnings in dev
+        }
+        originalError.apply(console, args);
+      };
+    }
+  }
+  return supabaseInstance;
+}
+
+export const supabase = getSupabaseClient();
 
 function getConfigError(): Error {
   return new Error(
@@ -66,7 +101,9 @@ export async function ensureAdminSession(): Promise<void> {
     .maybeSingle<{ role: ProfileRole }>();
 
   if (profileError) {
-    throw new Error(`Failed to resolve your profile role: ${profileError.message}`);
+    throw new Error(
+      `Failed to resolve your profile role: ${profileError.message}`,
+    );
   }
 
   if (!profile || profile.role !== "admin") {
