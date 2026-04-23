@@ -236,8 +236,8 @@ export default function AdminProductForm() {
       originalPrice: null,
       imageUrl: "",
       category: "",
-      sizes: "",
-      stock: 0,
+      sizes: "38, 39, 40, 41, 42, 43",
+      stock: 100,
       featured: false,
     },
   });
