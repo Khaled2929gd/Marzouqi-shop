@@ -7,7 +7,7 @@ import {
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -30,16 +30,22 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function AdminOrders() {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const { data: orders, isLoading } = useListOrders();
   const updateStatus = useUpdateOrderStatus();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const filteredOrders = orders?.filter(
     (o) =>
-      o.customerName.toLowerCase().includes(search.toLowerCase()) ||
-      o.customerEmail.toLowerCase().includes(search.toLowerCase()) ||
-      o.id.toString().includes(search),
+      o.customerName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      o.customerEmail.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      o.id.toString().includes(debouncedSearch),
   );
 
   const handleStatusChange = (id: number, status: string) => {

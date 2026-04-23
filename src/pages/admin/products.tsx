@@ -9,7 +9,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -27,15 +27,21 @@ import { formatPrice } from "@/lib/utils";
 
 export default function AdminProducts() {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const { data: products, isLoading } = useListProducts();
   const deleteProduct = useDeleteProduct();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const filteredProducts = products?.filter(
     (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.brand.toLowerCase().includes(search.toLowerCase()),
+      p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      p.brand.toLowerCase().includes(debouncedSearch.toLowerCase()),
   );
 
   const handleDelete = (id: number) => {

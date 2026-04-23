@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  ReactNode,
+} from "react";
 
 export interface CartItem {
   productId: number;
@@ -43,10 +51,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  const addItem = (newItem: CartItem) => {
+  const addItem = useCallback((newItem: CartItem) => {
     setItems((currentItems) => {
       const existingItemIndex = currentItems.findIndex(
-        (item) => item.productId === newItem.productId && item.size === newItem.size
+        (item) =>
+          item.productId === newItem.productId && item.size === newItem.size,
       );
 
       if (existingItemIndex > -1) {
@@ -57,50 +66,59 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       return [...currentItems, newItem];
     });
-  };
+  }, []);
 
-  const removeItem = (productId: number, size: number) => {
+  const removeItem = useCallback((productId: number, size: number) => {
     setItems((currentItems) =>
-      currentItems.filter((item) => !(item.productId === productId && item.size === size))
+      currentItems.filter(
+        (item) => !(item.productId === productId && item.size === size),
+      ),
     );
-  };
+  }, []);
 
-  const updateQuantity = (productId: number, size: number, quantity: number) => {
-    if (quantity < 1) {
-      removeItem(productId, size);
-      return;
-    }
+  const updateQuantity = useCallback(
+    (productId: number, size: number, quantity: number) => {
+      if (quantity < 1) {
+        removeItem(productId, size);
+        return;
+      }
 
-    setItems((currentItems) =>
-      currentItems.map((item) =>
-        item.productId === productId && item.size === size
-          ? { ...item, quantity }
-          : item
-      )
-    );
-  };
+      setItems((currentItems) =>
+        currentItems.map((item) =>
+          item.productId === productId && item.size === size
+            ? { ...item, quantity }
+            : item,
+        ),
+      );
+    },
+    [removeItem],
+  );
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setItems([]);
-  };
+  }, []);
 
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
   const itemCount = items.reduce((count, item) => count + item.quantity, 0);
 
+  const contextValue = useMemo(
+    () => ({
+      items,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      total,
+      itemCount,
+    }),
+    [items, total, itemCount, addItem, removeItem, updateQuantity, clearCart],
+  );
+
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        addItem,
-        removeItem,
-        updateQuantity,
-        clearCart,
-        total,
-        itemCount,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+    <CartContext.Provider value={contextValue}>{children}</CartContext.Provider>
   );
 }
 

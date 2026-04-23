@@ -1,9 +1,9 @@
 import { Link, useLocation } from "wouter";
 import { ShoppingBag, Home, LayoutGrid, ArrowLeft } from "lucide-react";
 import { useCart } from "../context/CartContext";
-import { ReactNode, useEffect } from "react";
+import React, { ReactNode, useEffect } from "react";
 
-export function Layout({
+export const Layout = React.memo(function Layout({
   children,
   hideNav = false,
   backButton = false,
@@ -191,4 +191,4 @@ export function Layout({
       )}
     </div>
   );
-}
+});

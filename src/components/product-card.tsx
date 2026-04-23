@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "wouter";
 import { Product } from "@workspace/api-client-react";
 import { formatPrice } from "@/lib/utils";
@@ -7,7 +8,10 @@ interface ProductCardProps {
   index?: number;
 }
 
-export function ProductCard({ product, index = 0 }: ProductCardProps) {
+export const ProductCard = React.memo(function ProductCard({
+  product,
+  index = 0,
+}: ProductCardProps) {
   return (
     <div
       className="group animate-card-fade-in"
@@ -24,6 +28,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             src={product.imageUrl}
             alt={product.name}
             loading={index < 4 ? "eager" : "lazy"}
+            fetchPriority={index < 2 ? "high" : "low"}
             decoding="async"
             width={640}
             height={640}
@@ -51,4 +56,4 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       </Link>
     </div>
   );
-}
+});
