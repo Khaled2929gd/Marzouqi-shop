@@ -27,7 +27,7 @@ export function Layout({
   return (
     <div
       className="min-h-dvh flex flex-col bg-[#0d0b09] pb-16 md:pb-0"
-      dir={isAdmin ? "ltr" : undefined}
+      dir={isAdmin ? "ltr" : "rtl"}
     >
       <a
         href="#main-content"
@@ -50,15 +50,18 @@ export function Layout({
               <ArrowLeft className={`w-5 h-5 ${!isAdmin ? "rtl-flip" : ""}`} />
             </button>
           ) : (
-            <Link href="/" className="flex items-center leading-none">
-              <img
-                src="/hmizat-logo.png"
-                alt="Hmizat Marzouki"
-                width={190}
-                height={40}
-                fetchPriority="high"
-                className="h-9 md:h-10 w-auto max-w-[150px] md:max-w-[190px] object-contain"
-              />
+            <Link href="/" className="flex items-center leading-none group">
+              <div className="flex flex-col gap-0 items-stretch">
+                <div className="flex items-baseline gap-2 whitespace-nowrap">
+                  <span className="font-black italic text-[#ff616d] text-xl md:text-2xl tracking-tight leading-none">
+                    Hmizat
+                  </span>
+                  <span className="font-semibold text-white text-xl md:text-2xl tracking-wide leading-none">
+                    Marzouki
+                  </span>
+                </div>
+                <div className="h-[2px] bg-[#ff616d] w-full mt-1 rounded-full" />
+              </div>
             </Link>
           )}
           {title && (
