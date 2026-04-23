@@ -19,14 +19,19 @@ export function normalizePhone(phone: string): string {
 
 /**
  * Format phone number for WhatsApp (international format with country code)
- * Handles Moroccan numbers: converts 0XXXXXXXXX to +212XXXXXXXXX
+ * Handles Moroccan numbers: converts 0XXXXXXXXX or XXXXXXXXX to 212XXXXXXXXX
  */
 export function formatPhoneForWhatsApp(phone: string): string {
   const digits = normalizePhone(phone);
 
-  // If starts with 0 (local Moroccan format), replace with 212
+  // If starts with 0 (local Moroccan format with leading 0), remove 0 and add 212
   if (digits.startsWith("0") && digits.length === 10) {
     return "212" + digits.substring(1);
+  }
+
+  // If 9 digits without leading 0, add 212 prefix (local Moroccan format)
+  if (digits.length === 9 && !digits.startsWith("212")) {
+    return "212" + digits;
   }
 
   // If already starts with 212, keep as is
@@ -40,13 +45,19 @@ export function formatPhoneForWhatsApp(phone: string): string {
 
 /**
  * Format phone number for display (with + prefix)
+ * Handles Moroccan numbers: converts 0XXXXXXXXX or XXXXXXXXX to +212XXXXXXXXX
  */
 export function formatPhoneInternational(phone: string): string {
   const digits = normalizePhone(phone);
 
-  // If starts with 0 (local format), replace with +212
+  // If starts with 0 (local format with leading 0), remove 0 and add +212
   if (digits.startsWith("0") && digits.length === 10) {
     return "+212" + digits.substring(1);
+  }
+
+  // If 9 digits without leading 0, add +212 prefix (local Moroccan format)
+  if (digits.length === 9 && !digits.startsWith("212")) {
+    return "+212" + digits;
   }
 
   // If starts with 212, add +

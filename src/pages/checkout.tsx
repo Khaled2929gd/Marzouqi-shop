@@ -34,9 +34,9 @@ export default function Checkout() {
 
   const validatePhone = (phoneNum: string): boolean => {
     const normalized = normalizePhone(phoneNum);
-    // Accept 13 digits for +212XXXXXXXXX or 10 digits for 0XXXXXXXXX
-    if (normalized.length !== 13 && normalized.length !== 10) {
-      setPhoneError("رقم الهاتف خاصو يبدا بـ +212");
+    // Accept 9 or 10 digits (XXXXXXXXX or 0XXXXXXXXX)
+    if (normalized.length !== 9 && normalized.length !== 10) {
+      setPhoneError("رقم الهاتف خاصو يكون 10 أرقام");
       return false;
     }
     setPhoneError("");
@@ -187,12 +187,12 @@ export default function Checkout() {
                 رقم الهاتف ديالك
               </span>
             </div>
-            <p className="text-base text-gray-600 mb-3">مثال: +212768605202</p>
+            <p className="text-base text-gray-600 mb-3">مثال: 0768605202</p>
             <input
               type="tel"
               value={phone}
               onChange={(e) => handlePhoneChange(e.target.value)}
-              placeholder="+212768605202"
+              placeholder="0768605202"
               dir="ltr"
               className={`
                 w-full h-20 px-6 text-3xl font-bold text-center
