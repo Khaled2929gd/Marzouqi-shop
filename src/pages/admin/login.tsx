@@ -17,11 +17,7 @@ export default function AdminLogin() {
   const redirectTarget = useMemo(() => {
     const query = new URLSearchParams(window.location.search);
     const redirect = query.get("redirect");
-
-    if (redirect && redirect.startsWith("/admin")) {
-      return redirect;
-    }
-
+    if (redirect && redirect.startsWith("/admin")) return redirect;
     return "/admin";
   }, [location]);
 
@@ -32,59 +28,40 @@ export default function AdminLogin() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && isAdmin) {
-      setLocation(redirectTarget);
-    }
+    if (!isLoading && isAdmin) setLocation(redirectTarget);
   }, [isAdmin, isLoading, redirectTarget, setLocation]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     setIsSubmitting(true);
-
     try {
       ensureSupabaseConfigured();
-
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            data: {
-              full_name: fullName || email.split("@")[0],
-            },
-          },
+          options: { data: { full_name: fullName || email.split("@")[0] } },
         });
-
-        if (error) {
-          throw new Error(error.message);
-        }
-
+        if (error) throw new Error(error.message);
         toast({
           title: "Account created",
-          description:
-            "Sign-up successful. Confirm email if required, then run 03_admin_account.sql to promote this user as admin.",
+          description: "Run 03_admin_account.sql to promote to admin.",
         });
-
         setMode("signin");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-
-        if (error) {
-          throw new Error(error.message);
-        }
-
+        if (error) throw new Error(error.message);
         await refresh();
         setLocation(redirectTarget);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Authentication failed";
       toast({
         title: "Authentication failed",
-        description: message,
+        description:
+          error instanceof Error ? error.message : "Authentication failed",
         variant: "destructive",
       });
     } finally {
@@ -96,7 +73,7 @@ export default function AdminLogin() {
     return (
       <Layout title="Admin Sign In" hideNav>
         <div className="flex h-[60vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-red-500" />
         </div>
       </Layout>
     );
@@ -105,18 +82,21 @@ export default function AdminLogin() {
   if (user && !isAdmin) {
     return (
       <Layout title="Admin Access" hideNav>
-        <div className="mx-auto mt-10 w-full max-w-lg rounded-3xl border border-amber-200 bg-amber-50 p-6">
-          <div className="mb-3 flex items-center gap-2 text-amber-800">
+        <div className="mx-auto mt-10 w-full max-w-lg rounded-3xl border border-amber-800/40 bg-amber-900/20 p-6">
+          <div className="mb-3 flex items-center gap-2 text-amber-400">
             <ShieldAlert className="h-5 w-5" />
-            <h2 className="text-lg font-semibold">Account is not an admin yet</h2>
+            <h2 className="text-lg font-semibold">
+              Account is not an admin yet
+            </h2>
           </div>
-          <p className="mb-6 text-sm text-amber-700">
-            You are signed in as {user.email}, but this account does not have admin role.
-            Promote this user with 03_admin_account.sql, then sign in again.
+          <p className="mb-6 text-sm text-amber-300/70">
+            Signed in as {user.email}, but this account has no admin role. Run
+            03_admin_account.sql, then sign in again.
           </p>
           <div className="flex gap-3">
             <Button
               variant="outline"
+              className="border-[#2a2520] text-[#f0e8e0]"
               onClick={async () => {
                 await signOut();
               }}
@@ -124,7 +104,9 @@ export default function AdminLogin() {
               Sign out
             </Button>
             <Link href="/">
-              <Button className="bg-red-600 hover:bg-red-700">Back to shop</Button>
+              <Button className="bg-red-600 hover:bg-red-700">
+                Back to shop
+              </Button>
             </Link>
           </div>
         </div>
@@ -134,13 +116,15 @@ export default function AdminLogin() {
 
   return (
     <Layout title="Admin Access" hideNav>
-      <div className="mx-auto mt-10 w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+      <div className="mx-auto mt-10 w-full max-w-md rounded-3xl border border-[#2a2520] bg-[#1c1916] p-6">
         <div className="mb-6">
-          <div className="mb-2 flex items-center gap-2 text-red-700">
+          <div className="mb-2 flex items-center gap-2 text-red-400">
             <ShieldCheck className="h-5 w-5" />
-            <h2 className="text-lg font-semibold">{mode === "signin" ? "Sign in" : "Create account"}</h2>
+            <h2 className="text-lg font-semibold text-[#f0e8e0]">
+              {mode === "signin" ? "Sign in" : "Create account"}
+            </h2>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-[#9a8880]">
             {mode === "signin"
               ? "Use your Supabase account with admin role."
               : "Create a Supabase account, then promote it to admin via SQL."}
@@ -150,40 +134,50 @@ export default function AdminLogin() {
         <form className="space-y-4" onSubmit={handleSubmit}>
           {mode === "signup" && (
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName" className="text-[#9a8880]">
+                Full Name
+              </Label>
               <Input
                 id="fullName"
                 value={fullName}
-                onChange={(event) => setFullName(event.target.value)}
+                onChange={(e) => setFullName(e.target.value)}
                 placeholder="Admin Name"
+                className="bg-[#242018] border-[#2a2520] text-[#f0e8e0] placeholder:text-[#6a5c56]"
               />
             </div>
           )}
-
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-[#9a8880]">
+              Email
+            </Label>
             <Input
               id="email"
               type="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@yourdomain.com"
               required
+              className="bg-[#242018] border-[#2a2520] text-[#f0e8e0] placeholder:text-[#6a5c56]"
             />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-[#9a8880]">
+              Password
+            </Label>
             <Input
               id="password"
               type="password"
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               required
+              className="bg-[#242018] border-[#2a2520] text-[#f0e8e0]"
             />
           </div>
-
-          <Button className="w-full bg-red-600 hover:bg-red-700" disabled={isSubmitting} type="submit">
+          <Button
+            className="w-full bg-red-600 hover:bg-red-700"
+            disabled={isSubmitting}
+            type="submit"
+          >
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -197,10 +191,10 @@ export default function AdminLogin() {
           </Button>
         </form>
 
-        <div className="mt-4 text-center text-sm text-gray-500">
-          {mode === "signin" ? "No account yet?" : "Already have an account?"} {" "}
+        <div className="mt-4 text-center text-sm text-[#9a8880]">
+          {mode === "signin" ? "No account yet?" : "Already have an account?"}{" "}
           <button
-            className="font-medium text-red-600 hover:text-red-700"
+            className="font-medium text-red-400 hover:text-red-300"
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
             type="button"
           >

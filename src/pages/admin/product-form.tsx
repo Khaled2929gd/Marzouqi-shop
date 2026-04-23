@@ -6,10 +6,8 @@ import {
   useGetProduct,
   useUpdateProduct,
   useListCategories,
-  useCreateCategory,
   type Category,
 } from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -54,6 +52,14 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
+// Slugify helper — matches the SQL view logic
+const slugify = (s: string) =>
+  s
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+
 const productSchema = z.object({
   name: z.string().min(2, "Nom requis"),
   brand: z.string().min(2, "Marque requise"),
@@ -67,7 +73,10 @@ const productSchema = z.object({
   featured: z.boolean().default(false),
 });
 
-// ── Category combobox: select existing or create a new one inline ──
+// ── Category combobox ──────────────────────────────────────────────────────
+// categories is a SQL VIEW — we can't insert into it.
+// Instead: let admin pick existing OR type a new slug that will be set
+// directly on the product. The new category auto-appears in the view after save.
 function CategoryCombobox({
   value,
   onChange,
@@ -79,11 +88,12 @@ function CategoryCombobox({
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const createCat = useCreateCategory();
 
-  const selected = categories?.find((c) => c.slug === value);
+  // Find selected category by slug or by raw value
+  const selected = categories?.find(
+    (c) => c.slug === value || c.name === value,
+  );
+  const displayLabel = selected ? selected.name : value || null;
 
   const filtered = query.trim()
     ? (categories ?? []).filter(
@@ -99,23 +109,12 @@ function CategoryCombobox({
       c.slug.toLowerCase() === query.trim().toLowerCase(),
   );
 
-  const handleCreate = () => {
-    if (!query.trim()) return;
-    createCat.mutate(
-      { name: query.trim() },
-      {
-        onSuccess: (cat) => {
-          queryClient.invalidateQueries({ queryKey: ["categories"] });
-          onChange(cat.slug);
-          setQuery("");
-          setOpen(false);
-          toast({ title: `Catégorie "${cat.name}" créée avec succès` });
-        },
-        onError: (err) => {
-          toast({ title: `Erreur : ${err.message}`, variant: "destructive" });
-        },
-      },
-    );
+  const handleUseNew = () => {
+    const slug = slugify(query.trim());
+    if (!slug) return;
+    onChange(slug);
+    setQuery("");
+    setOpen(false);
   };
 
   return (
@@ -126,28 +125,29 @@ function CategoryCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between font-normal"
+          className="w-full justify-between font-normal border-[#2a2520] bg-[#242018] text-[#f0e8e0] hover:bg-[#2a2520]"
         >
-          <span className={cn(!selected && "text-muted-foreground")}>
-            {selected ? selected.name : "Sélectionner ou créer…"}
+          <span className={cn(!displayLabel && "text-[#6a5c56]")}>
+            {displayLabel ?? "Sélectionner ou créer…"}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[--radix-popover-trigger-width] p-0"
+        className="w-[--radix-popover-trigger-width] p-0 bg-[#1c1916] border-[#2a2520]"
         align="start"
       >
-        <Command shouldFilter={false}>
+        <Command shouldFilter={false} className="bg-[#1c1916]">
           <CommandInput
-            placeholder="Rechercher ou taper un nouveau nom…"
+            placeholder="Rechercher ou taper une nouvelle catégorie…"
             value={query}
             onValueChange={setQuery}
+            className="text-[#f0e8e0]"
           />
           <CommandList>
             {(categories ?? []).length === 0 && !query.trim() && (
-              <CommandEmpty>
-                Aucune catégorie. Tapez un nom pour en créer une.
+              <CommandEmpty className="text-[#9a8880]">
+                Tapez un nom pour créer une nouvelle catégorie.
               </CommandEmpty>
             )}
             {filtered.length > 0 && (
@@ -161,42 +161,41 @@ function CategoryCombobox({
                       setQuery("");
                       setOpen(false);
                     }}
+                    className="text-[#f0e8e0] data-[selected=true]:bg-[#2a2520]"
                   >
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4 shrink-0",
-                        value === cat.slug ? "opacity-100" : "opacity-0",
+                        value === cat.slug || value === cat.name
+                          ? "opacity-100 text-[#ff616d]"
+                          : "opacity-0",
                       )}
                     />
                     <span className="flex-1">{cat.name}</span>
-                    <span className="ml-2 text-xs text-muted-foreground opacity-60">
+                    <span className="ml-2 text-xs text-[#6a5c56]">
                       {cat.slug}
                     </span>
                   </CommandItem>
                 ))}
               </CommandGroup>
             )}
-            {filtered.length === 0 && query.trim() && !exactMatch && (
-              <CommandEmpty>Aucun résultat pour "{query}".</CommandEmpty>
+            {filtered.length === 0 && query.trim() && (
+              <CommandEmpty className="text-[#9a8880]">
+                Sera créée automatiquement lors de l&apos;enregistrement.
+              </CommandEmpty>
             )}
             {query.trim() && !exactMatch && (
               <>
-                <CommandSeparator />
+                <CommandSeparator className="bg-[#2a2520]" />
                 <CommandGroup>
                   <CommandItem
                     value={`__new__${query}`}
-                    onSelect={handleCreate}
-                    disabled={createCat.isPending}
-                    className="text-red-600 data-[selected=true]:bg-red-50 data-[selected=true]:text-red-700"
+                    onSelect={handleUseNew}
+                    className="text-emerald-400 data-[selected=true]:bg-[#1a2a20] data-[selected=true]:text-emerald-300"
                   >
-                    {createCat.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Plus className="mr-2 h-4 w-4 shrink-0" />
-                    )}
-                    {createCat.isPending
-                      ? "Création en cours…"
-                      : `Créer la catégorie "${query}"`}
+                    <Plus className="mr-2 h-4 w-4 shrink-0" />
+                    Utiliser &ldquo;{slugify(query)}&rdquo; comme nouvelle
+                    catégorie
                   </CommandItem>
                 </CommandGroup>
               </>
@@ -221,12 +220,8 @@ export default function AdminProductForm() {
 
   const { data: categories } = useListCategories();
   const { data: product, isLoading: isLoadingProduct } = useGetProduct(id, {
-    query: {
-      enabled: isEdit && !!id,
-      queryKey: getGetProductQueryKey(id),
-    },
+    query: { enabled: isEdit && !!id, queryKey: getGetProductQueryKey(id) },
   });
-
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const isPending = createProduct.isPending || updateProduct.isPending;
@@ -247,7 +242,6 @@ export default function AdminProductForm() {
     },
   });
 
-  // Update preview when imageUrl field changes manually
   const watchedImageUrl = form.watch("imageUrl");
   useEffect(() => {
     if (
@@ -285,82 +279,54 @@ export default function AdminProductForm() {
       });
       return;
     }
-
     setIsAutoFilling(true);
+    const prompt = `Tu es un expert en sneakers. Pour le produit "${name}", génère un JSON avec exactement ces clés: brand (string), description (string, 1-2 phrases en français), price (number, prix réaliste en MAD), sizes (string, ex: "39, 40, 41, 42, 43"), category (string, une parmi: running/basketball/lifestyle/casual/football/training). Réponds UNIQUEMENT avec le JSON, sans markdown.`;
     try {
-      const prompt = `Tu es un expert en sneakers. Pour le produit "${name}", génère uniquement un objet JSON valide (sans texte avant ou après, sans markdown) avec ces clés exactes:
-"brand" (la marque, ex: Nike),
-"description" (2 phrases marketing en français),
-"price" (prix USD suggéré, nombre),
-"category" (une parmi: basketball, lifestyle, running, casual, football, training),
-"sizes" (pointures européennes comma-separated, ex: "38, 39, 40, 41, 42, 43").`;
-
-      const res = await fetch("https://text.pollinations.ai/", {
+      const res = await fetch("https://api.a0.dev/ai/llm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [{ role: "user", content: prompt }],
-          model: "mistral",
+          model: "gpt-4o-mini",
           seed: 42,
           jsonMode: true,
         }),
       });
-
-      if (!res.ok) throw new Error("Réponse invalide");
-
       const raw = await res.text();
-      let data: Record<string, unknown>;
+      let data: Record<string, unknown> = {};
       try {
-        data = JSON.parse(raw);
+        const m = raw.match(/\{[\s\S]*\}/);
+        data = JSON.parse(m ? m[0] : raw);
       } catch {
-        const jsonMatch = raw.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error("Format JSON invalide");
-        data = JSON.parse(jsonMatch[0]);
+        data = {};
       }
-
-      if (data.brand)
-        form.setValue("brand", String(data.brand), {
-          shouldDirty: true,
-          shouldValidate: true,
-        });
+      const opts = { shouldDirty: true, shouldValidate: true };
+      if (data.brand) form.setValue("brand", String(data.brand), opts);
       if (data.description)
-        form.setValue("description", String(data.description), {
-          shouldDirty: true,
-          shouldValidate: true,
-        });
-      if (data.price && !form.getValues("price"))
+        form.setValue("description", String(data.description), opts);
+      if (data.price)
         form.setValue("price", Number(data.price), { shouldDirty: true });
-      if (data.category)
-        form.setValue("category", String(data.category), {
+      if (data.sizes)
+        form.setValue("sizes", String(data.sizes), {
           shouldDirty: true,
           shouldValidate: true,
         });
-      if (data.sizes)
-        form.setValue("sizes", String(data.sizes), { shouldDirty: true });
-
+      if (data.category) form.setValue("category", String(data.category), opts);
       toast({
-        title: "Infos remplies automatiquement !",
+        title: "Rempli avec succès !",
         description: "Vérifiez et ajustez si nécessaire.",
       });
     } catch {
-      toast({
-        title: "Échec de l'auto-remplissage",
-        description: "Réessayez dans un moment.",
-        variant: "destructive",
-      });
+      toast({ title: "Erreur lors de l'auto-fill", variant: "destructive" });
     } finally {
       setIsAutoFilling(false);
     }
   };
 
-  const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
-
-    // Show local preview immediately before upload completes
-    const localUrl = URL.createObjectURL(file);
-    setPreviewUrl(localUrl);
-
+    setPreviewUrl(URL.createObjectURL(file));
     setIsUploadingImage(true);
     try {
       const uploadedUrl = await uploadProductImage(file);
@@ -369,21 +335,17 @@ export default function AdminProductForm() {
         shouldValidate: true,
       });
       setPreviewUrl(uploadedUrl);
-      toast({
-        title: "Image uploadée",
-        description: "URL remplie depuis Supabase Storage.",
-      });
+      toast({ title: "Image uploadée" });
     } catch (error) {
       setPreviewUrl(null);
-      const message = error instanceof Error ? error.message : "Upload failed";
       toast({
         title: "Échec de l'upload",
-        description: message,
+        description: error instanceof Error ? error.message : "Erreur",
         variant: "destructive",
       });
     } finally {
       setIsUploadingImage(false);
-      event.target.value = "";
+      if (imageInputRef.current) imageInputRef.current.value = "";
     }
   };
 
@@ -391,10 +353,8 @@ export default function AdminProductForm() {
     const sizes = values.sizes
       .split(",")
       .map((s) => Number(s.trim()))
-      .filter((n) => !Number.isNaN(n));
-
+      .filter((n) => !isNaN(n) && n > 0);
     const payload = { ...values, sizes, images: [] };
-
     if (isEdit) {
       updateProduct.mutate(
         { id, data: payload },
@@ -426,7 +386,7 @@ export default function AdminProductForm() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-red-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-red-500" />
         </div>
       </Layout>
     );
@@ -434,271 +394,317 @@ export default function AdminProductForm() {
 
   return (
     <Layout title={isEdit ? "Modifier Produit" : "Nouveau Produit"}>
-      <div className="px-4 md:px-8 py-8 w-full max-w-2xl mx-auto">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-            {/* Name + Auto-fill */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom du produit</FormLabel>
-                  <div className="flex gap-2">
-                    <FormControl>
-                      <Input
-                        placeholder="Air Jordan 1 High"
-                        className="flex-1"
-                        {...field}
-                      />
-                    </FormControl>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="shrink-0 gap-1.5 text-purple-700 border-purple-200 hover:bg-purple-50"
-                      onClick={handleAutoFill}
-                      disabled={isAutoFilling}
-                    >
-                      {isAutoFilling ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Sparkles className="w-4 h-4" />
-                      )}
-                      <span className="hidden sm:inline text-sm">
-                        Auto-fill
-                      </span>
-                    </Button>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <div className="px-4 md:px-8 py-6 w-full max-w-3xl mx-auto pb-24 md:pb-12">
+        <Button
+          variant="ghost"
+          className="mb-6 -ml-4 text-[#9a8880] hover:text-[#f0e8e0] hover:bg-[#1c1916]"
+          onClick={() => window.history.back()}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" /> Retour
+        </Button>
 
-            {/* Brand + Category */}
-            <div className="grid grid-cols-2 gap-4">
+        <div className="bg-[#1c1916] border border-[#2a2520] p-5 md:p-8 rounded-3xl">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Name + Auto-fill */}
               <FormField
                 control={form.control}
-                name="brand"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Marque</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nike" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-500">
-                      Catégorie{" "}
-                      <span className="text-xs font-normal">(optionnel)</span>
+                    <FormLabel className="text-[#9a8880]">
+                      Nom du produit
                     </FormLabel>
-                    <CategoryCombobox
-                      value={field.value}
-                      onChange={field.onChange}
-                      categories={categories}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Price + Original price + Stock */}
-            <div className="grid grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prix ($)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="originalPrice"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-500">
-                      Barré ($){" "}
-                      <span className="text-xs font-normal">(opt.)</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="—"
-                        {...field}
-                        value={field.value ?? ""}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? Number(e.target.value) : null,
-                          )
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="stock"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Stock</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Sizes */}
-            <FormField
-              control={form.control}
-              name="sizes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Pointures (séparées par virgule)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="38, 39, 40, 41, 42, 43" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Image */}
-            <FormField
-              control={form.control}
-              name="imageUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Image</FormLabel>
-                  <div className="flex gap-3">
-                    <div className="shrink-0 w-20 h-20 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden">
-                      {previewUrl ? (
-                        <img
-                          src={previewUrl}
-                          alt="Aperçu"
-                          className="w-full h-full object-contain p-1"
-                          onError={() => setPreviewUrl(null)}
-                        />
-                      ) : (
-                        <ImageIcon className="w-6 h-6 text-gray-300" />
-                      )}
-                    </div>
-                    <div className="flex-1 space-y-2">
+                    <div className="flex gap-2">
                       <FormControl>
                         <Input
-                          placeholder="https://… ou /images/shoe.png"
+                          placeholder="Air Jordan 1 High"
+                          className="flex-1 bg-[#242018] border-[#2a2520] text-[#f0e8e0] placeholder:text-[#6a5c56]"
                           {...field}
                         />
                       </FormControl>
-                      <input
-                        ref={imageInputRef}
-                        type="file"
-                        accept="image/png,image/jpeg,image/webp"
-                        className="hidden"
-                        onChange={handleImageUpload}
-                      />
                       <Button
                         type="button"
                         variant="outline"
-                        size="sm"
-                        className="rounded-full"
-                        onClick={() => imageInputRef.current?.click()}
-                        disabled={isUploadingImage}
+                        className="shrink-0 rounded-xl border-purple-800/50 bg-purple-900/20 text-purple-300 hover:bg-purple-900/40 gap-1.5"
+                        onClick={handleAutoFill}
+                        disabled={isAutoFilling}
                       >
-                        {isUploadingImage ? (
-                          <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                        {isAutoFilling ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
-                          <Upload className="w-3.5 h-3.5 mr-1.5" />
+                          <Sparkles className="w-4 h-4" />
                         )}
-                        {isUploadingImage ? "Upload…" : "Uploader"}
+                        <span className="hidden sm:inline text-sm font-medium">
+                          {isAutoFilling ? "En cours…" : "Auto-fill"}
+                        </span>
                       </Button>
                     </div>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Description — optional, collapsed */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">
-                    Description{" "}
-                    <span className="text-xs font-normal">(optionnel)</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Description du produit…"
-                      className="resize-none h-20"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="brand"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#9a8880]">Marque</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Nike"
+                          className="bg-[#242018] border-[#2a2520] text-[#f0e8e0] placeholder:text-[#6a5c56]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="text-[#9a8880]">
+                        Catégorie{" "}
+                        <span className="text-xs font-normal text-[#6a5c56]">
+                          (optionnel)
+                        </span>
+                      </FormLabel>
+                      <CategoryCombobox
+                        value={field.value}
+                        onChange={field.onChange}
+                        categories={categories}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            {/* Featured */}
-            <FormField
-              control={form.control}
-              name="featured"
-              render={({ field }) => (
-                <FormItem className="flex items-center gap-3 space-y-0">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormLabel className="font-normal cursor-pointer">
-                    Produit en vedette (page d'accueil)
-                  </FormLabel>
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[#9a8880]">
+                      Description{" "}
+                      <span className="text-xs font-normal text-[#6a5c56]">
+                        (optionnel)
+                      </span>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Description du produit…"
+                        className="resize-none h-24 bg-[#242018] border-[#2a2520] text-[#f0e8e0] placeholder:text-[#6a5c56]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Actions */}
-            <div className="flex justify-end gap-3 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setLocation("/admin/products")}
-                className="rounded-full"
-              >
-                Annuler
-              </Button>
-              <Button
-                type="submit"
-                disabled={isPending}
-                className="rounded-full"
-              >
-                {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {isEdit ? "Enregistrer" : "Créer"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#9a8880]">
+                        Prix (د.م)
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          className="bg-[#242018] border-[#2a2520] text-[#f0e8e0]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="originalPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#9a8880]">
+                        Prix barré{" "}
+                        <span className="text-xs font-normal text-[#6a5c56]">
+                          (opt.)
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="—"
+                          className="bg-[#242018] border-[#2a2520] text-[#f0e8e0] placeholder:text-[#6a5c56]"
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value ? Number(e.target.value) : null,
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="stock"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2 sm:col-span-1">
+                      <FormLabel className="text-[#9a8880]">Stock</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="bg-[#242018] border-[#2a2520] text-[#f0e8e0]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="sizes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[#9a8880]">
+                      Pointures (séparées par virgule)
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="38, 39, 40, 41, 42, 43"
+                        className="bg-[#242018] border-[#2a2520] text-[#f0e8e0] placeholder:text-[#6a5c56]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Image upload */}
+              <FormField
+                control={form.control}
+                name="imageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[#9a8880]">
+                      Image du produit
+                    </FormLabel>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="shrink-0 w-full sm:w-32 h-32 rounded-2xl border-2 border-dashed border-[#2a2520] bg-[#181512] flex items-center justify-center overflow-hidden">
+                        {previewUrl ? (
+                          <img
+                            src={previewUrl}
+                            alt="Aperçu"
+                            className="w-full h-full object-contain p-2"
+                            onError={() => setPreviewUrl(null)}
+                          />
+                        ) : (
+                          <ImageIcon className="w-8 h-8 text-[#6a5c56]" />
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-3">
+                        <FormControl>
+                          <Input
+                            placeholder="https://… ou /images/shoe.png"
+                            className="bg-[#242018] border-[#2a2520] text-[#f0e8e0] placeholder:text-[#6a5c56]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <input
+                          ref={imageInputRef}
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="rounded-full w-full sm:w-auto border-[#2a2520] text-[#f0e8e0] hover:bg-[#242018]"
+                          onClick={() => imageInputRef.current?.click()}
+                          disabled={isUploadingImage}
+                        >
+                          {isUploadingImage ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Upload className="w-4 h-4 mr-2" />
+                          )}
+                          {isUploadingImage
+                            ? "Upload en cours…"
+                            : "Uploader une image"}
+                        </Button>
+                      </div>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="featured"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-xl border border-[#2a2520] bg-[#181512] p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-[#f0e8e0]">
+                        Produit en vedette
+                      </FormLabel>
+                      <p className="text-sm text-[#9a8880]">
+                        Apparaît dans la section tendances de la page
+                        d&apos;accueil.
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <div className="pt-4 flex flex-col-reverse sm:flex-row justify-end gap-3 border-t border-[#2a2520]">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setLocation("/admin/products")}
+                  className="rounded-full border-[#2a2520] text-[#f0e8e0] hover:bg-[#242018]"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="rounded-full bg-red-600 hover:bg-red-700"
+                >
+                  {isPending && (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  )}
+                  {isEdit ? "Enregistrer" : "Créer le produit"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
       </div>
     </Layout>
   );

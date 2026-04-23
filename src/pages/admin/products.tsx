@@ -1,5 +1,9 @@
 import { Layout } from "../../components/layout";
-import { useListProducts, useDeleteProduct, getListProductsQueryKey } from "@workspace/api-client-react";
+import {
+  useListProducts,
+  useDeleteProduct,
+  getListProductsQueryKey,
+} from "@workspace/api-client-react";
 import { Plus, Edit, Trash2, Search } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -19,6 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { formatPrice } from "@/lib/utils";
 
 export default function AdminProducts() {
   const [search, setSearch] = useState("");
@@ -27,9 +32,10 @@ export default function AdminProducts() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const filteredProducts = products?.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.brand.toLowerCase().includes(search.toLowerCase())
+  const filteredProducts = products?.filter(
+    (p) =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.brand.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleDelete = (id: number) => {
@@ -38,31 +44,40 @@ export default function AdminProducts() {
       {
         onSuccess: () => {
           toast({ title: "Produit supprimé" });
-          queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+          queryClient.invalidateQueries({
+            queryKey: getListProductsQueryKey(),
+          });
         },
-        onError: () => {
-          toast({ title: "Échec de la suppression", variant: "destructive" });
-        }
-      }
+        onError: () =>
+          toast({ title: "Échec de la suppression", variant: "destructive" }),
+      },
     );
   };
 
   const DeleteButton = ({ id, name }: { id: number; name: string }) => (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg border-rose-200 hover:bg-rose-50 hover:text-rose-600 text-rose-500">
+        <Button
+          variant="outline"
+          size="icon"
+          className="w-8 h-8 rounded-lg border-rose-900/50 hover:bg-rose-900/30 hover:text-rose-400 text-rose-500"
+        >
           <Trash2 className="w-4 h-4" />
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-[#1c1916] border-[#2a2520]">
         <AlertDialogHeader>
-          <AlertDialogTitle>Supprimer le produit</AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogTitle className="text-[#f0e8e0]">
+            Supprimer le produit
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-[#9a8880]">
             Supprimer {name} ? Cette action est irréversible.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogCancel className="border-[#2a2520] text-[#f0e8e0] hover:bg-[#242018]">
+            Annuler
+          </AlertDialogCancel>
           <AlertDialogAction
             className="bg-rose-600 hover:bg-rose-700"
             onClick={() => handleDelete(id)}
@@ -77,15 +92,14 @@ export default function AdminProducts() {
   return (
     <Layout title="Produits">
       <div className="px-4 md:px-8 py-6 w-full max-w-6xl mx-auto pb-24 md:pb-12 space-y-6">
-
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="relative max-w-md w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6a5c56]" />
             <Input
               placeholder="Rechercher un produit..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-white border-gray-200"
+              className="pl-9 bg-[#1c1916] border-[#2a2520] text-[#f0e8e0] placeholder:text-[#6a5c56]"
             />
           </div>
           <Link href="/admin/products/new">
@@ -96,10 +110,9 @@ export default function AdminProducts() {
           </Link>
         </div>
 
-        <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-
+        <div className="bg-[#1c1916] border border-[#2a2520] rounded-3xl overflow-hidden">
           {/* Mobile card list */}
-          <div className="md:hidden divide-y divide-gray-100">
+          <div className="md:hidden divide-y divide-[#2a2520]">
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="p-4 flex gap-3 items-center">
@@ -113,27 +126,45 @@ export default function AdminProducts() {
                 </div>
               ))
             ) : filteredProducts?.length === 0 ? (
-              <p className="p-8 text-center text-gray-500 text-sm">Aucun produit trouvé.</p>
+              <p className="p-8 text-center text-[#6a5c56] text-sm">
+                Aucun produit trouvé.
+              </p>
             ) : (
               filteredProducts?.map((product) => (
                 <div key={product.id} className="p-4 flex gap-3 items-center">
-                  <div className="w-14 h-14 bg-gray-50 rounded-xl p-1 border border-gray-100 shrink-0">
-                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-contain" />
+                  <div className="w-14 h-14 bg-[#242018] rounded-xl p-1 border border-[#2a2520] shrink-0">
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-bold text-gray-900 text-sm truncate">{product.name}</div>
-                    <div className="text-xs text-gray-500 uppercase tracking-wide">{product.brand} · {product.category}</div>
+                    <div className="font-bold text-[#f0e8e0] text-sm truncate">
+                      {product.name}
+                    </div>
+                    <div className="text-xs text-[#9a8880] uppercase tracking-wide">
+                      {product.brand} · {product.category}
+                    </div>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="font-semibold text-sm text-gray-900">${product.price.toFixed(2)}</span>
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${product.stock > 10 ? "bg-emerald-50 text-emerald-700" : product.stock > 0 ? "bg-amber-50 text-amber-700" : "bg-rose-50 text-rose-700"}`}>
+                      <span className="font-semibold text-sm text-[#f0e8e0]">
+                        {formatPrice(product.price)}
+                      </span>
+                      <span
+                        className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${product.stock > 10 ? "bg-emerald-900/40 text-emerald-300" : product.stock > 0 ? "bg-amber-900/40 text-amber-300" : "bg-rose-900/40 text-rose-300"}`}
+                      >
                         {product.stock} en stock
                       </span>
                     </div>
                   </div>
                   <div className="flex gap-1.5 shrink-0">
                     <Link href={`/admin/products/${product.id}/edit`}>
-                      <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg">
-                        <Edit className="w-4 h-4 text-gray-600" />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="w-8 h-8 rounded-lg border-[#2a2520] text-[#9a8880] hover:text-[#f0e8e0] hover:bg-[#242018]"
+                      >
+                        <Edit className="w-4 h-4" />
                       </Button>
                     </Link>
                     <DeleteButton id={product.id} name={product.name} />
@@ -147,7 +178,7 @@ export default function AdminProducts() {
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 bg-gray-50/50">
+                <tr className="border-b border-[#2a2520] text-xs uppercase tracking-wider text-[#6a5c56] bg-[#181512]">
                   <th className="p-4 font-semibold w-16">Image</th>
                   <th className="p-4 font-semibold">Nom & Marque</th>
                   <th className="p-4 font-semibold">Prix</th>
@@ -155,49 +186,82 @@ export default function AdminProducts() {
                   <th className="p-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 text-sm">
+              <tbody className="divide-y divide-[#2a2520] text-sm">
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i}>
-                      <td className="p-4"><Skeleton className="h-12 w-12 rounded-xl" /></td>
-                      <td className="p-4"><Skeleton className="h-4 w-40 mb-2" /><Skeleton className="h-3 w-20" /></td>
-                      <td className="p-4"><Skeleton className="h-4 w-16" /></td>
-                      <td className="p-4"><Skeleton className="h-4 w-12" /></td>
-                      <td className="p-4"><Skeleton className="h-8 w-16 ml-auto" /></td>
+                      <td className="p-4">
+                        <Skeleton className="h-12 w-12 rounded-xl" />
+                      </td>
+                      <td className="p-4">
+                        <Skeleton className="h-4 w-40 mb-2" />
+                        <Skeleton className="h-3 w-20" />
+                      </td>
+                      <td className="p-4">
+                        <Skeleton className="h-4 w-16" />
+                      </td>
+                      <td className="p-4">
+                        <Skeleton className="h-4 w-12" />
+                      </td>
+                      <td className="p-4">
+                        <Skeleton className="h-8 w-16 ml-auto" />
+                      </td>
                     </tr>
                   ))
                 ) : filteredProducts?.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-gray-500">Aucun produit trouvé.</td>
+                    <td colSpan={5} className="p-8 text-center text-[#6a5c56]">
+                      Aucun produit trouvé.
+                    </td>
                   </tr>
                 ) : (
                   filteredProducts?.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50 transition-colors group">
+                    <tr
+                      key={product.id}
+                      className="hover:bg-[#242018] transition-colors group"
+                    >
                       <td className="p-4">
-                        <div className="w-12 h-12 bg-gray-50 rounded-xl p-1 border border-gray-100">
-                          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-contain" />
+                        <div className="w-12 h-12 bg-[#242018] rounded-xl p-1 border border-[#2a2520]">
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="w-full h-full object-contain"
+                          />
                         </div>
                       </td>
                       <td className="p-4">
-                        <div className="font-bold text-gray-900 mb-0.5">{product.name}</div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wider">{product.brand} · {product.category}</div>
+                        <div className="font-bold text-[#f0e8e0] mb-0.5">
+                          {product.name}
+                        </div>
+                        <div className="text-xs text-[#9a8880] uppercase tracking-wider">
+                          {product.brand} · {product.category}
+                        </div>
                       </td>
-                      <td className="p-4 font-semibold text-gray-900">
-                        ${product.price.toFixed(2)}
-                        {product.originalPrice && product.originalPrice > product.price && (
-                          <span className="text-xs text-gray-400 line-through block font-normal">${product.originalPrice.toFixed(2)}</span>
-                        )}
+                      <td className="p-4 font-semibold text-[#f0e8e0]">
+                        {formatPrice(product.price)}
+                        {product.originalPrice &&
+                          product.originalPrice > product.price && (
+                            <span className="text-xs text-[#6a5c56] line-through block font-normal">
+                              {formatPrice(product.originalPrice)}
+                            </span>
+                          )}
                       </td>
                       <td className="p-4">
-                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${product.stock > 10 ? "bg-emerald-50 text-emerald-700" : product.stock > 0 ? "bg-amber-50 text-amber-700" : "bg-rose-50 text-rose-700"}`}>
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${product.stock > 10 ? "bg-emerald-900/40 text-emerald-300" : product.stock > 0 ? "bg-amber-900/40 text-amber-300" : "bg-rose-900/40 text-rose-300"}`}
+                        >
                           {product.stock} en stock
                         </span>
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Link href={`/admin/products/${product.id}/edit`}>
-                            <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg">
-                              <Edit className="w-4 h-4 text-gray-600" />
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="w-8 h-8 rounded-lg border-[#2a2520] text-[#9a8880] hover:text-[#f0e8e0] hover:bg-[#1c1916]"
+                            >
+                              <Edit className="w-4 h-4" />
                             </Button>
                           </Link>
                           <DeleteButton id={product.id} name={product.name} />
@@ -209,7 +273,6 @@ export default function AdminProducts() {
               </tbody>
             </table>
           </div>
-
         </div>
       </div>
     </Layout>
