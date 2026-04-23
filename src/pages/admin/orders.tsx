@@ -41,13 +41,13 @@ type Order = {
   status: string;
   customerName: string;
   customerEmail: string;
-  customerPhone: string;
+  customerPhone?: string;
   address: string;
   city: string;
   items: Array<{
     productId: number;
     productName: string;
-    size: string;
+    size: number;
     quantity: number;
     price: number;
   }>;
@@ -384,7 +384,9 @@ export default function AdminOrders() {
                         <Phone className="w-3 h-3" />
                         Téléphone
                       </p>
-                      <p className="text-sm">{selectedOrder.customerPhone}</p>
+                      <p className="text-sm">
+                        {selectedOrder.customerPhone || "Non fourni"}
+                      </p>
                     </div>
                     <div>
                       <p className="text-xs text-[#6a5c56] mb-1 flex items-center gap-1">
