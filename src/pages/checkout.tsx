@@ -3,19 +3,9 @@ import { useCart } from "../context/CartContext";
 import { useLocation } from "wouter";
 import { useCreateOrder } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ShieldCheck, Loader2, MessageCircle } from "lucide-react";
+import { useState } from "react";
+import { MessageCircle, Phone, MapPin, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
-
-const checkoutSchema = z.object({
-  customerPhone: z.string().min(8, "أدخل رقم هاتف صحيح"),
-  address: z.string().min(6, "أدخل عنوانك الكامل")
-});
 
 const WHATSAPP_ORDER_PHONE = import.meta.env.VITE_WHATSAPP_ORDER_PHONE || "";
 
@@ -29,7 +19,11 @@ export default function Checkout() {
   const { toast } = useToast();
   const createOrder = useCreateOrder();
 
-  const delivery = 5.00;
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+
+  const delivery = 5.0;
   const finalTotal = total + delivery;
 
   if (items.length === 0) {
@@ -37,44 +31,25 @@ export default function Checkout() {
     return null;
   }
 
-  const form = useForm<z.infer<typeof checkoutSchema>>({
-    resolver: zodResolver(checkoutSchema),
-    defaultValues: { customerPhone: "", address: "" },
-  });
-
-  const openWhatsAppOrder = (values: z.infer<typeof checkoutSchema>) => {
-    if (!WHATSAPP_ORDER_PHONE) {
-      toast({
-        title: "واتساب غير مضبوط",
-        description: "أضف VITE_WHATSAPP_ORDER_PHONE في .env لتفعيل هذا الخيار.",
-        variant: "destructive",
-      });
-      return;
+  const validatePhone = (phoneNum: string): boolean => {
+    const normalized = normalizePhone(phoneNum);
+    if (normalized.length !== 10) {
+      setPhoneError("رقم الهاتف خاصو يكون 10 أرقام");
+      return false;
     }
-
-    const lines = [
-      "السلام، بغيت ندير طلب من مرزوقي:",
-      "",
-      ...items.map(
-        (item) =>
-          `- ${item.productName} | مقاس ${item.size} | كمية ${item.quantity} | ${(item.price * item.quantity).toFixed(2)}$`,
-      ),
-      "",
-      `المجموع: ${total.toFixed(2)}$`,
-      `التوصيل: ${delivery.toFixed(2)}$`,
-      `الإجمالي: ${finalTotal.toFixed(2)}$`,
-      "",
-      `الهاتف: ${values.customerPhone}`,
-      `العنوان: ${values.address}`,
-    ];
-
-    const targetNumber = normalizePhone(WHATSAPP_ORDER_PHONE);
-    const text = encodeURIComponent(lines.join("\n"));
-    window.open(`https://wa.me/${targetNumber}?text=${text}`, "_blank", "noopener,noreferrer");
+    setPhoneError("");
+    return true;
   };
 
-  const onSubmit = (values: z.infer<typeof checkoutSchema>) => {
-    const normalizedPhone = normalizePhone(values.customerPhone);
+  const handlePhoneChange = (value: string) => {
+    setPhone(value);
+    if (phoneError) setPhoneError("");
+  };
+
+  const handleConfirmOrder = () => {
+    if (!validatePhone(phone)) return;
+
+    const normalizedPhone = normalizePhone(phone);
     const now = Date.now();
     const customerTag = normalizedPhone.slice(-4) || `${now}`.slice(-4);
     const generatedName = `عميل-${customerTag}`;
@@ -85,16 +60,16 @@ export default function Checkout() {
         data: {
           customerName: generatedName,
           customerEmail: generatedEmail,
-          customerPhone: values.customerPhone,
-          address: values.address,
+          customerPhone: phone,
+          address: address || "سيتم التواصل",
           city: "المغرب",
           discountCode: undefined,
-          items: items.map(item => ({
+          items: items.map((item) => ({
             productId: item.productId,
             size: item.size,
-            quantity: item.quantity
-          }))
-        }
+            quantity: item.quantity,
+          })),
+        },
       },
       {
         onSuccess: (order) => {
@@ -104,145 +79,200 @@ export default function Checkout() {
         onError: () => {
           toast({
             title: "ما قدرناش نكملوا الطلب",
-            description: "عاود جرب من بعد شوية.",
-            variant: "destructive"
+            description: "عاود جرب من بعد شوية",
+            variant: "destructive",
           });
-        }
-      }
+        },
+      },
+    );
+  };
+
+  const handleWhatsAppOrder = () => {
+    if (!validatePhone(phone)) return;
+
+    if (!WHATSAPP_ORDER_PHONE) {
+      toast({
+        title: "واتساب غير متوفر",
+        description: "جرب الطريقة الأخرى",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const lines = [
+      "السلام عليكم، بغيت ندير طلب:",
+      "",
+      ...items.map(
+        (item) =>
+          `• ${item.productName} - مقاس ${item.size} - عدد ${item.quantity} - ${(item.price * item.quantity).toFixed(2)}$`,
+      ),
+      "",
+      `المجموع: ${finalTotal.toFixed(2)}$`,
+      "",
+      `رقم الهاتف: ${phone}`,
+      address ? `العنوان: ${address}` : "",
+    ];
+
+    const targetNumber = normalizePhone(WHATSAPP_ORDER_PHONE);
+    const text = encodeURIComponent(lines.filter(Boolean).join("\n"));
+    window.open(
+      `https://wa.me/${targetNumber}?text=${text}`,
+      "_blank",
+      "noopener,noreferrer",
     );
   };
 
   return (
-    <Layout title="إتمام الطلب" hideNav backButton>
-      <div className="flex flex-col lg:flex-row gap-8 px-4 md:px-8 py-8 w-full">
+    <Layout title="أكمل الطلب" hideNav backButton>
+      <div className="min-h-screen bg-white px-4 py-6 pb-32">
+        {/* Simple Order Summary */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Package className="w-6 h-6 text-gray-700" />
+            <h2 className="text-xl font-bold text-gray-900">طلبك</h2>
+          </div>
 
-        {/* Checkout Form */}
-        <div className="flex-1 lg:max-w-xl">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-
-              <div>
-                <h3 className="text-base font-bold text-gray-900 mb-5">معلومات التوصيل</h3>
-                <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="customerPhone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm text-gray-600">رقم الهاتف</FormLabel>
-                        <FormControl>
-                          <Input placeholder="06 12 34 56 78" className="h-12 bg-gray-50 border-transparent rounded-xl focus:bg-white" dir="ltr" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm text-gray-600">العنوان الكامل</FormLabel>
-                        <FormControl>
-                          <Input placeholder="الدار، الحي، المدينة..." className="h-12 bg-gray-50 border-transparent rounded-xl focus:bg-white" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+          <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+            {items.map((item) => (
+              <div
+                key={`${item.productId}-${item.size}`}
+                className="flex gap-3 items-center"
+              >
+                <div className="w-16 h-16 bg-white rounded-xl p-1 shrink-0">
+                  <img
+                    src={item.productImage}
+                    alt={item.productName}
+                    className="w-full h-full object-contain"
                   />
                 </div>
-              </div>
-
-              {/* Mobile Pay Buttons */}
-              <div className="block lg:hidden space-y-3 pt-2">
-                <Button
-                  type="submit"
-                  disabled={createOrder.isPending}
-                  className="w-full h-12 rounded-full bg-gray-900 hover:bg-black text-white font-semibold"
-                >
-                  {createOrder.isPending
-                    ? <Loader2 className="w-5 h-5 animate-spin" />
-                    : <span dir="ltr">تأكيد الطلب — {finalTotal.toFixed(2)}$</span>
-                  }
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full h-12 rounded-full font-medium border-gray-200"
-                  onClick={form.handleSubmit(openWhatsAppOrder)}
-                >
-                  <MessageCircle className="w-4 h-4 me-2" />
-                  اطلب بواتساب
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </div>
-
-        {/* Order Summary Sidebar */}
-        <div className="w-full lg:w-88 shrink-0">
-          <div className="bg-gray-50 rounded-2xl p-6 sticky top-24">
-            <h3 className="font-black text-gray-900 mb-5">في سلتك</h3>
-
-            <div className="space-y-3 mb-5 max-h-64 overflow-y-auto pe-1 custom-scrollbar">
-              {items.map((item) => (
-                <div key={`${item.productId}-${item.size}`} className="flex gap-3">
-                  <div className="w-14 h-14 bg-white rounded-xl p-1 shrink-0 flex items-center justify-center">
-                    <img src={item.productImage} alt={item.productName} loading="lazy" decoding="async" width={128} height={128} className="w-full h-full object-contain" />
-                  </div>
-                  <div className="flex-1 py-0.5">
-                    <h4 className="text-sm font-semibold text-gray-900 line-clamp-1">{item.productName}</h4>
-                    <p className="text-xs text-gray-400">مقاس {item.size} · ×{item.quantity}</p>
-                    <p className="text-sm font-bold text-gray-900 mt-1" dir="ltr">${(item.price * item.quantity).toFixed(2)}</p>
-                  </div>
+                <div className="flex-1">
+                  <p className="font-bold text-base text-gray-900">
+                    {item.productName}
+                  </p>
+                  <p className="text-gray-600 text-sm">
+                    مقاس {item.size} × {item.quantity}
+                  </p>
                 </div>
-              ))}
-            </div>
-
-            <div className="h-px bg-gray-200 mb-5"></div>
-
-            <div className="space-y-2 mb-5 text-sm">
-              <div className="flex justify-between text-gray-600">
-                <span>المجموع</span>
-                <span className="font-medium text-gray-900" dir="ltr">${total.toFixed(2)}</span>
+                <p className="font-bold text-lg text-gray-900" dir="ltr">
+                  ${(item.price * item.quantity).toFixed(2)}
+                </p>
               </div>
-              <div className="flex justify-between text-gray-600">
-                <span>التوصيل</span>
-                <span className="font-medium text-gray-900" dir="ltr">${delivery.toFixed(2)}</span>
+            ))}
+
+            <div className="border-t-2 border-gray-200 pt-3 mt-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xl font-bold text-gray-900">
+                  المجموع الكامل
+                </span>
+                <span className="text-2xl font-black text-green-600" dir="ltr">
+                  ${finalTotal.toFixed(2)}
+                </span>
               </div>
-            </div>
-
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-gray-900 font-bold">الإجمالي</span>
-              <span className="text-2xl font-black text-gray-900" dir="ltr">${finalTotal.toFixed(2)}</span>
-            </div>
-
-            <div className="hidden lg:flex lg:flex-col lg:gap-3">
-              <Button
-                onClick={form.handleSubmit(onSubmit)}
-                disabled={createOrder.isPending}
-                className="w-full h-12 rounded-full bg-gray-900 hover:bg-black text-white font-semibold"
-              >
-                {createOrder.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "تأكيد الطلب"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full h-12 rounded-full font-medium border-gray-200"
-                onClick={form.handleSubmit(openWhatsAppOrder)}
-              >
-                <MessageCircle className="w-4 h-4 me-2" />
-                اطلب بواتساب
-              </Button>
-            </div>
-
-            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              دفع آمن وسهل
+              <p className="text-sm text-gray-500 mt-1">التوصيل داخل</p>
             </div>
           </div>
         </div>
 
+        {/* HUGE Phone Input */}
+        <div className="mb-6">
+          <label className="block mb-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Phone className="w-6 h-6 text-gray-700" />
+              <span className="text-xl font-bold text-gray-900">
+                رقم الهاتف ديالك
+              </span>
+            </div>
+            <p className="text-base text-gray-600 mb-3">مثال: 0612345678</p>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => handlePhoneChange(e.target.value)}
+              placeholder="0612345678"
+              dir="ltr"
+              className={`
+                w-full h-20 px-6 text-3xl font-bold text-center
+                border-4 rounded-2xl bg-gray-50
+                focus:outline-none focus:border-blue-500 focus:bg-white
+                transition-all
+                ${phoneError ? "border-red-500" : "border-gray-200"}
+              `}
+            />
+            {phoneError && (
+              <p className="text-red-600 text-lg font-bold mt-2 text-center">
+                ⚠️ {phoneError}
+              </p>
+            )}
+          </label>
+        </div>
+
+        {/* Optional Address */}
+        <div className="mb-8">
+          <label className="block">
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin className="w-6 h-6 text-gray-700" />
+              <span className="text-lg font-bold text-gray-900">
+                العنوان (اختياري)
+              </span>
+            </div>
+            <p className="text-sm text-gray-500 mb-3">
+              إذا بغيتي التوصيل لدار، كتب العنوان
+            </p>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="مثال: 12 زنقة المسيرة، الرباط"
+              className="
+                w-full h-16 px-5 text-lg
+                border-2 border-gray-200 rounded-xl bg-gray-50
+                focus:outline-none focus:border-blue-500 focus:bg-white
+                transition-all
+              "
+            />
+          </label>
+        </div>
+
+        {/* Fixed Bottom Buttons */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-4 border-gray-100 p-4 space-y-3 shadow-2xl">
+          {/* Main Confirm Button - MASSIVE */}
+          <Button
+            onClick={handleConfirmOrder}
+            disabled={createOrder.isPending || !phone}
+            className="
+              w-full h-20 text-2xl font-black rounded-2xl
+              bg-green-600 hover:bg-green-700 active:bg-green-800
+              text-white shadow-xl
+              disabled:bg-gray-300 disabled:text-gray-500
+              transition-all transform active:scale-95
+            "
+          >
+            {createOrder.isPending ? (
+              <div className="flex flex-col items-center">
+                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mb-1"></div>
+                <span className="text-lg">جاري التحضير...</span>
+              </div>
+            ) : (
+              <span>✓ أكد الطلب الآن</span>
+            )}
+          </Button>
+
+          {/* WhatsApp Button */}
+          <Button
+            onClick={handleWhatsAppOrder}
+            disabled={!phone}
+            type="button"
+            className="
+              w-full h-16 text-xl font-bold rounded-xl
+              bg-white hover:bg-gray-50 active:bg-gray-100
+              text-green-600 border-4 border-green-600
+              disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300
+              transition-all transform active:scale-95
+            "
+          >
+            <MessageCircle className="w-6 h-6 ml-2" />
+            أو اطلب بواتساب
+          </Button>
+        </div>
       </div>
     </Layout>
   );
